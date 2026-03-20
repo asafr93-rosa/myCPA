@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #0D1117;
+  --color-bg-card: #161B22;
+  --color-bg-panel: #1C2128;
+  --color-accent-teal: #00D4AA;
+  --color-accent-amber: #F59E0B;
+  --color-accent-red: #F87171;
+  --color-accent-blue: #58A6FF;
+  --color-border-glass: rgba(255, 255, 255, 0.08);
+  --color-text-primary: #E6EDF3;
+  --color-text-muted: #7D8590;
+  --color-text-subtle: #484F58;
+
+  --font-mono: "DM Mono", ui-monospace, monospace;
+  --font-sans: "Sora", ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: #0D1117;
+  color: #E6EDF3;
+  font-family: "Sora", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #0D1117;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0D1117;
+}
+::-webkit-scrollbar-thumb {
+  background: #30363D;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #484F58;
+}
+
+.font-mono {
+  font-family: "DM Mono", ui-monospace, monospace;
+}
+
+.glass-card {
+  background-color: #161B22;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease both;
+}
+
+.animate-slide-right {
+  animation: slideInRight 0.3s ease both;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #161B22 25%, #1C2128 50%, #161B22 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
