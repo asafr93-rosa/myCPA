@@ -15,31 +15,40 @@ export function RecommendationPanel() {
   )
 
   return (
-    <div className="flex flex-col gap-3 h-full">
-      <div className="flex items-center gap-2">
-        <div className="w-1.5 h-1.5 rounded-full bg-[#00D4AA] animate-pulse" />
-        <span className="text-xs font-semibold text-[#7D8590] uppercase tracking-wider">
-          Suggestions
-        </span>
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Panel header */}
+      <div className="shrink-0 px-4 pt-5 pb-4">
+        <div className="flex items-center gap-2 mb-0.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#00D4AA] animate-pulse" />
+          <span className="text-[10px] font-semibold text-[#484F58] uppercase tracking-widest">
+            Suggestions
+          </span>
+        </div>
+        <p className="text-[10px] text-[#30363D] pl-3.5">
+          {suggestions.length === 0 ? 'All accounts healthy' : `${suggestions.length} recommendation${suggestions.length !== 1 ? 's' : ''}`}
+        </p>
       </div>
 
-      {suggestions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-1 py-8 text-center">
-          <div className="w-10 h-10 rounded-full bg-[#00D4AA]/10 flex items-center justify-center mb-3">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 10l4 4 8-8" stroke="#00D4AA" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6">
+        {suggestions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <div className="w-9 h-9 rounded-full bg-[#00D4AA]/8 flex items-center justify-center mb-2.5">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8l3.5 3.5 6.5-7" stroke="#00D4AA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <p className="text-xs font-medium text-[#7D8590]">All clear</p>
+            <p className="text-[10px] text-[#30363D] mt-0.5">No deficits to cover</p>
           </div>
-          <p className="text-sm font-medium text-[#E6EDF3]">All clear</p>
-          <p className="text-xs text-[#484F58] mt-1">No deficits to cover</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2 overflow-y-auto">
-          {suggestions.map((s) => (
-            <RecommendationCard key={s.id} suggestion={s} />
-          ))}
-        </div>
-      )}
+        ) : (
+          <div className="space-y-2">
+            {suggestions.map((s) => (
+              <RecommendationCard key={s.id} suggestion={s} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
