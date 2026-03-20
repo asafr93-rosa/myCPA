@@ -226,7 +226,19 @@ export const useFinanceStore = create<FinanceState>()(
       },
 
       updateAccount: (id, data) => {
-        set((state) => ({ accounts: state.accounts.map((a) => (a.id === id ? { ...a, ...data } : a)) }))
+        set((state) => {
+          const accounts = state.accounts.map((a) => (a.id === id ? { ...a, ...data } : a))
+          if (!data.name) return { accounts }
+          const newName = accounts.find((a) => a.id === id)!.name
+          const priorityConfig = state.priorityConfig.map((p) => {
+            if (p.id !== id) return p
+            if (p.type === 'bank_savings') return { ...p, label: `${newName} — Savings` }
+            if (p.type === 'bank_deposits') return { ...p, label: `${newName} — Deposits` }
+            if (p.type === 'bank_balance') return { ...p, label: `${newName} — Liquid Balance` }
+            return p
+          })
+          return { accounts, priorityConfig }
+        })
       },
 
       deleteAccount: (id) => {
@@ -245,7 +257,15 @@ export const useFinanceStore = create<FinanceState>()(
       },
 
       updateInvestment: (id, data) => {
-        set((state) => ({ investments: state.investments.map((i) => (i.id === id ? { ...i, ...data } : i)) }))
+        set((state) => {
+          const investments = state.investments.map((i) => (i.id === id ? { ...i, ...data } : i))
+          if (!data.name) return { investments }
+          const newName = investments.find((i) => i.id === id)!.name
+          const priorityConfig = state.priorityConfig.map((p) =>
+            p.type === 'investment' && p.id === id ? { ...p, label: newName } : p
+          )
+          return { investments, priorityConfig }
+        })
       },
 
       deleteInvestment: (id) => {
