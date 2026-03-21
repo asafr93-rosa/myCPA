@@ -268,12 +268,6 @@ const TYPE_ICONS: Record<PriorityItem['type'], React.ReactNode> = {
       <circle cx="3.5" cy="9" r="0.75" fill="#00D4AA"/>
     </svg>
   ),
-  bank_savings: (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M2 11V5.5a5 5 0 0110 0V11" stroke="#F59E0B" strokeWidth="1.2" strokeLinecap="round"/>
-      <circle cx="7" cy="7.5" r="0.75" fill="#F59E0B"/>
-    </svg>
-  ),
   bank_deposits: (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
       <rect x="1" y="3" width="12" height="8" rx="1.5" stroke="#F59E0B" strokeWidth="1.2"/>
@@ -287,10 +281,10 @@ const TYPE_ICONS: Record<PriorityItem['type'], React.ReactNode> = {
   ),
 }
 const TYPE_COLORS: Record<PriorityItem['type'], string> = {
-  bank_balance: '#00D4AA', bank_savings: '#F59E0B', bank_deposits: '#F59E0B', investment: '#C084FC',
+  bank_balance: '#00D4AA', bank_deposits: '#F59E0B', investment: '#C084FC',
 }
 const TYPE_LABELS: Record<PriorityItem['type'], string> = {
-  bank_balance: 'Balance', bank_savings: 'Savings', bank_deposits: 'Deposits', investment: 'Investment',
+  bank_balance: 'Balance', bank_deposits: 'Deposits', investment: 'Investment',
 }
 
 function SortableItem({

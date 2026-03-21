@@ -65,7 +65,7 @@ export interface InvestmentTracking {
 }
 
 export interface PriorityItem {
-  type: 'bank_balance' | 'bank_savings' | 'bank_deposits' | 'investment'
+  type: 'bank_balance' | 'bank_deposits' | 'investment'
   id?: string
   label: string
 }
@@ -247,7 +247,6 @@ const SAMPLE_ASSETS: Asset[] = [
 function buildPriorityFromData(accounts: BankAccount[], investments: Investment[]): PriorityItem[] {
   const items: PriorityItem[] = []
   for (const acc of accounts) {
-    items.push({ type: 'bank_savings', id: acc.id, label: `${acc.name} — Savings` })
     items.push({ type: 'bank_deposits', id: acc.id, label: `${acc.name} — Deposits` })
     items.push({ type: 'bank_balance', id: acc.id, label: `${acc.name} — Liquid Balance` })
   }
@@ -347,7 +346,6 @@ export const useFinanceStore = create<FinanceState>()(
           const newName = accounts.find((a) => a.id === id)!.name
           const priorityConfig = state.priorityConfig.map((p) => {
             if (p.id !== id) return p
-            if (p.type === 'bank_savings') return { ...p, label: `${newName} — Savings` }
             if (p.type === 'bank_deposits') return { ...p, label: `${newName} — Deposits` }
             if (p.type === 'bank_balance') return { ...p, label: `${newName} — Liquid Balance` }
             return p
@@ -570,6 +568,10 @@ export const useFinanceStore = create<FinanceState>()(
           if (!state.settings.exchangeRates.GBP_ILS) state.settings.exchangeRates.GBP_ILS = 4.60
           if (!(['ILS','USD','EUR','GBP'] as string[]).includes(state.settings.displayCurrency)) {
             state.settings.displayCurrency = 'ILS'
+          }
+          // Remove legacy bank_savings priority items (savings field removed)
+          if (state.priorityConfig) {
+            state.priorityConfig = state.priorityConfig.filter((p) => (p.type as string) !== 'bank_savings')
           }
           // Migrate assets
           if (!state.assets) state.assets = []

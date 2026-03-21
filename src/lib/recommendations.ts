@@ -6,7 +6,7 @@ export interface Suggestion {
   id: string
   type: 'transfer' | 'savings_withdrawal' | 'deposit_withdrawal' | 'liquidation'
   fromId: string
-  fromType: 'bank_balance' | 'bank_savings' | 'bank_deposits' | 'investment'
+  fromType: 'bank_balance' | 'bank_deposits' | 'investment'
   fromLabel: string
   toAccountId: string
   toLabel: string
@@ -26,9 +26,6 @@ export function computeRecommendations(
   // Mutable available amounts in ILS (for simulation)
   const liquidILS = new Map<string, number>(
     accounts.map((a) => [a.id, convertAmount(a.balance, a.balanceCurrency, 'ILS', rates)])
-  )
-  const savingsILS = new Map<string, number>(
-    accounts.map((a) => [a.id, convertAmount(a.savings, 'ILS', 'ILS', rates)])
   )
   const depositsILS = new Map<string, number>(
     accounts.map((a) => [a.id, convertAmount(a.deposits, a.depositsCurrency, 'ILS', rates)])
@@ -66,28 +63,6 @@ export function computeRecommendations(
           deficitAccountId: account.id,
         })
         liquidILS.set(item.id, avail - amount)
-        deficitILS -= amount
-
-      } else if (item.type === 'bank_savings' && item.id) {
-        const avail = savingsILS.get(item.id) ?? 0
-        if (avail <= 0) continue
-        const amount = Math.min(avail, deficitILS)
-        const sourceAcc = accounts.find((a) => a.id === item.id)
-        if (!sourceAcc) continue
-
-        suggestions.push({
-          id: `sug-${Date.now()}-${Math.random()}`,
-          type: 'savings_withdrawal',
-          fromId: item.id,
-          fromType: 'bank_savings',
-          fromLabel: sourceAcc.name,
-          toAccountId: account.id,
-          toLabel: account.name,
-          amountILS: amount,
-          message: `Withdraw from savings in **${sourceAcc.name}** to cover **${account.name}**: ${formatCurrency(amount, 'ILS')}`,
-          deficitAccountId: account.id,
-        })
-        savingsILS.set(item.id, avail - amount)
         deficitILS -= amount
 
       } else if (item.type === 'bank_deposits' && item.id) {
