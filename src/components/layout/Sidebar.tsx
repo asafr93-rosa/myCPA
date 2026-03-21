@@ -49,12 +49,11 @@ const NAV_ITEMS = [
   },
   {
     path: '/settings',
-    label: 'Priorities',
+    label: 'Profile',
     icon: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M3 5h12M3 9h8M3 13h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        <circle cx="14" cy="13" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M14 11.5V13l.75.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="9" cy="6" r="3" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M3 16c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
       </svg>
     ),
   },

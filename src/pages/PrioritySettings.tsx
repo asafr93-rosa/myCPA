@@ -382,8 +382,8 @@ export function PrioritySettings() {
     <div className="h-full flex flex-col overflow-hidden">
       {/* Fixed header */}
       <div className="shrink-0 px-5 pt-5 pb-4 border-b border-white/8">
-        <h1 className="text-xl font-semibold text-[#E6EDF3]">Settings</h1>
-        <p className="text-sm text-[#7D8590]">Profile, appearance, currency, and priorities</p>
+        <h1 className="text-xl font-semibold text-[#E6EDF3]">My Profile</h1>
+        <p className="text-sm text-[#7D8590]">Personal info, appearance, currency, and priorities</p>
       </div>
 
       {/* Scrollable body */}
