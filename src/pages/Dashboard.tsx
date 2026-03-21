@@ -5,15 +5,15 @@ import { formatCurrency, convertAmount } from '../lib/formatters'
 import { computeRecommendations } from '../lib/recommendations'
 import { Link } from 'react-router-dom'
 
-function KPICard({ label, value, isNegative = false }: {
-  label: string; value: number; isNegative?: boolean
+function KPICard({ label, value, currency, isNegative = false }: {
+  label: string; value: number; currency: string; isNegative?: boolean
 }) {
   return (
     <div className="glass-card px-4 py-3 flex flex-col gap-0.5">
       <span className="text-[10px] font-medium text-[#484F58] uppercase tracking-widest">{label}</span>
       <AnimatedCounter
         value={value}
-        currency="ILS"
+        currency={currency}
         className={`text-lg font-semibold font-mono ${isNegative ? 'text-[#F87171]' : 'text-[#E6EDF3]'}`}
       />
     </div>
@@ -58,25 +58,30 @@ export function Dashboard() {
   const accounts = useFinanceStore((s) => s.accounts)
   const investments = useFinanceStore((s) => s.investments)
   const priorityConfig = useFinanceStore((s) => s.priorityConfig)
-  const rates = useFinanceStore((s) => s.settings.exchangeRates)
+  const settings = useFinanceStore((s) => s.settings)
+  const rates = settings.exchangeRates
+  const displayCurrency = settings.displayCurrency
 
   const totals = useMemo(() => {
-    const liquid = accounts.reduce((s, a) => s + computeTotalBalance(a, rates), 0)
-    const deposits = accounts.reduce(
-      (s, a) => s + convertAmount(a.deposits, a.depositsCurrency, 'ILS', rates),
-      0
+    const liquidILS = accounts.reduce((s, a) => s + computeTotalBalance(a, rates), 0)
+    const depositsILS = accounts.reduce(
+      (s, a) => s + convertAmount(a.deposits, a.depositsCurrency, 'ILS', rates), 0
     )
-    const stocks = accounts.reduce(
-      (s, a) => s + convertAmount(a.stockBalance, a.stockCurrency, 'ILS', rates),
-      0
+    const stocksILS = accounts.reduce(
+      (s, a) => s + convertAmount(a.stockBalance, a.stockCurrency, 'ILS', rates), 0
     )
-    const inv = investments.reduce(
-      (s, i) => s + convertAmount(i.balance, i.currency, 'ILS', rates),
-      0
+    const invILS = investments.reduce(
+      (s, i) => s + convertAmount(i.balance, i.currency, 'ILS', rates), 0
     )
-    const netWorth = liquid + deposits + stocks + inv
-    return { netWorth, liquid, deposits, inv }
-  }, [accounts, investments, rates])
+    const netWorthILS = liquidILS + depositsILS + stocksILS + invILS
+    const toDisplay = (v: number) => convertAmount(v, 'ILS', displayCurrency, rates)
+    return {
+      netWorth: toDisplay(netWorthILS),
+      liquid: toDisplay(liquidILS),
+      deposits: toDisplay(depositsILS),
+      inv: toDisplay(invILS),
+    }
+  }, [accounts, investments, rates, displayCurrency])
 
   const suggestions = useMemo(
     () => computeRecommendations(accounts, investments, priorityConfig, rates),
@@ -106,15 +111,15 @@ export function Dashboard() {
       {/* Header */}
       <div className="shrink-0 px-5 pt-5 pb-3">
         <h1 className="text-base font-semibold text-[#E6EDF3] leading-tight">Dashboard</h1>
-        <p className="text-xs text-[#484F58]">All amounts in ILS ₪</p>
+        <p className="text-xs text-[#484F58]">All amounts in {displayCurrency}</p>
       </div>
 
       {/* KPI strip */}
       <div className="shrink-0 px-5 pb-3 grid grid-cols-2 gap-2">
-        <KPICard label="Net Worth" value={totals.netWorth} isNegative={totals.netWorth < 0} />
-        <KPICard label="Liquid" value={totals.liquid} isNegative={totals.liquid < 0} />
-        <KPICard label="Deposits" value={totals.deposits} />
-        <KPICard label="Investments" value={totals.inv} />
+        <KPICard label="Net Worth" value={totals.netWorth} currency={displayCurrency} isNegative={totals.netWorth < 0} />
+        <KPICard label="Liquid" value={totals.liquid} currency={displayCurrency} isNegative={totals.liquid < 0} />
+        <KPICard label="Deposits" value={totals.deposits} currency={displayCurrency} />
+        <KPICard label="Investments" value={totals.inv} currency={displayCurrency} />
       </div>
 
       {/* Scrollable body */}

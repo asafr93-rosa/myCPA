@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { Sidebar } from './components/layout/Sidebar'
@@ -9,6 +10,14 @@ import { Investments } from './pages/Investments'
 import { AIAdvisor } from './pages/AIAdvisor'
 import { PrioritySettings } from './pages/PrioritySettings'
 import { useFinanceStore } from './store/useFinanceStore'
+
+function ThemeApplier() {
+  const theme = useFinanceStore((s) => s.settings.theme)
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme ?? 'dark')
+  }, [theme])
+  return null
+}
 
 function SampleDataBanner() {
   const sampleDataLoaded = useFinanceStore((s) => s.sampleDataLoaded)
@@ -60,6 +69,7 @@ function Layout() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ThemeApplier />
       <Toaster
         position="bottom-right"
         toastOptions={{

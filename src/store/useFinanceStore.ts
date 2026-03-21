@@ -40,12 +40,21 @@ export interface PriorityItem {
   label: string
 }
 
+export interface UserProfile {
+  name: string
+  age: string
+  avatarDataUrl: string
+}
+
 export interface AppSettings {
-  displayCurrency: 'ILS' | 'USD' | 'EUR'
+  displayCurrency: 'ILS' | 'USD' | 'EUR' | 'GBP'
   exchangeRates: {
     USD_ILS: number
     EUR_ILS: number
+    GBP_ILS: number
   }
+  theme: 'dark' | 'light'
+  userProfile: UserProfile
 }
 
 export interface RecommendationAction {
@@ -88,7 +97,9 @@ const ACCOUNT_COLORS = ['#00D4AA', '#58A6FF', '#F59E0B', '#C084FC', '#F87171', '
 
 const DEFAULT_SETTINGS: AppSettings = {
   displayCurrency: 'ILS',
-  exchangeRates: { USD_ILS: 3.65, EUR_ILS: 3.95 },
+  exchangeRates: { USD_ILS: 3.65, EUR_ILS: 3.95, GBP_ILS: 4.60 },
+  theme: 'dark',
+  userProfile: { name: '', age: '', avatarDataUrl: '' },
 }
 
 // ── Sample data ───────────────────────────────────────────────────────────────
@@ -308,6 +319,7 @@ export const useFinanceStore = create<FinanceState>()(
             ...state.settings,
             ...newSettings,
             exchangeRates: { ...state.settings.exchangeRates, ...(newSettings.exchangeRates ?? {}) },
+            userProfile: { ...state.settings.userProfile, ...(newSettings.userProfile ?? {}) },
           },
         }))
       },
@@ -324,7 +336,16 @@ export const useFinanceStore = create<FinanceState>()(
           state.sampleDataLoaded = true
           state.sampleDataDismissed = false
         }
-        if (state && !state.settings) state.settings = DEFAULT_SETTINGS
+        if (state) {
+          if (!state.settings) state.settings = DEFAULT_SETTINGS
+          // Migrate missing fields added in later versions
+          if (!state.settings.theme) state.settings.theme = 'dark'
+          if (!state.settings.userProfile) state.settings.userProfile = { name: '', age: '', avatarDataUrl: '' }
+          if (!state.settings.exchangeRates.GBP_ILS) state.settings.exchangeRates.GBP_ILS = 4.60
+          if (!(['ILS','USD','EUR','GBP'] as string[]).includes(state.settings.displayCurrency)) {
+            state.settings.displayCurrency = 'ILS'
+          }
+        }
       },
     }
   )

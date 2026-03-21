@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useFinanceStore } from '../../store/useFinanceStore'
 
 const NAV_ITEMS = [
   {
@@ -60,8 +61,9 @@ const NAV_ITEMS = [
 ]
 
 export function Sidebar() {
+  const userProfile = useFinanceStore((s) => s.settings.userProfile)
   return (
-    <aside className="hidden md:flex flex-col w-56 min-h-screen bg-[#0D1117] border-r border-white/8 px-3 py-5 shrink-0">
+    <aside className="hidden md:flex flex-col w-56 h-full bg-[#0D1117] border-r border-white/8 px-3 py-5 shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-3 mb-8">
         <div className="w-7 h-7 bg-[#00D4AA] rounded-lg flex items-center justify-center shrink-0">
@@ -93,10 +95,27 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="px-3 pt-4 border-t border-white/8">
-        <p className="text-[10px] text-[#484F58]">Floww v1.0</p>
-      </div>
+      {/* User profile */}
+      <NavLink to="/settings" className="px-3 pt-4 border-t border-white/8 flex items-center gap-2.5 group">
+        <div className="w-7 h-7 rounded-full overflow-hidden bg-[#1C2128] border border-white/10 flex items-center justify-center shrink-0">
+          {userProfile?.avatarDataUrl ? (
+            <img src={userProfile.avatarDataUrl} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="5" r="2.5" stroke="#484F58" strokeWidth="1.2"/>
+              <path d="M2 12c0-2.8 2.2-4.5 5-4.5s5 1.7 5 4.5" stroke="#484F58" strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-[#7D8590] group-hover:text-[#E6EDF3] transition-colors truncate">
+            {userProfile?.name || 'My Profile'}
+          </p>
+          {userProfile?.age && (
+            <p className="text-[10px] text-[#484F58]">Age {userProfile.age}</p>
+          )}
+        </div>
+      </NavLink>
     </aside>
   )
 }
