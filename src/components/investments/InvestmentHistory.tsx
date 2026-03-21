@@ -120,7 +120,7 @@ function SnapshotRow({ snapshot, onDelete, onSaveEdit }: SnapshotRowProps) {
           {snapshot.note && <span className="text-[10px] text-[#484F58] truncate">· {snapshot.note}</span>}
         </div>
       </div>
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1">
         <button
           onClick={() => setEditing(true)}
           className="text-[#7D8590] hover:text-[#E6EDF3] p-1 rounded transition-colors"
