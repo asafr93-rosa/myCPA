@@ -3,10 +3,12 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { Sidebar } from './components/layout/Sidebar'
 import { BottomNav } from './components/layout/BottomNav'
+import { TopBar } from './components/layout/TopBar'
 import { RightPanel } from './components/layout/RightPanel'
 import { Dashboard } from './pages/Dashboard'
 import { BankAccounts } from './pages/BankAccounts'
 import { Investments } from './pages/Investments'
+import { Assets } from './pages/Assets'
 import { AIAdvisor } from './pages/AIAdvisor'
 import { PrioritySettings } from './pages/PrioritySettings'
 import { useFinanceStore } from './store/useFinanceStore'
@@ -55,6 +57,7 @@ function Layout() {
     <div className="flex h-dvh overflow-hidden">
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        <TopBar />
         <SampleDataBanner />
         <main className="flex-1 overflow-hidden">
           <Outlet />
@@ -93,6 +96,7 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="accounts" element={<BankAccounts />} />
           <Route path="investments" element={<Investments />} />
+          <Route path="assets" element={<Assets />} />
           <Route path="advisor" element={<AIAdvisor />} />
           <Route path="settings" element={<PrioritySettings />} />
         </Route>

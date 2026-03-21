@@ -46,12 +46,12 @@ const NAV_ITEMS = [
     ),
   },
   {
-    path: '/settings',
-    label: 'Profile',
+    path: '/assets',
+    label: 'Assets',
     icon: (
       <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
-        <circle cx="9" cy="6" r="3" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M3 16c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M1.5 17V8.5L9 3l7.5 5.5V17H1.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+        <path d="M6.5 17v-5h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
       </svg>
     ),
   },

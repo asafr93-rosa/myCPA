@@ -37,6 +37,16 @@ const NAV_ITEMS = [
     ),
   },
   {
+    path: '/assets',
+    label: 'Assets',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M1.5 16.5V8.5L9 3l7.5 5.5v8H1.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+        <path d="M6.5 16.5v-5h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
     path: '/advisor',
     label: 'AI Advisor',
     icon: (

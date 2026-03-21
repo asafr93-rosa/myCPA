@@ -58,6 +58,7 @@ const SUGGESTION_COLORS = {
 export function Dashboard() {
   const accounts = useFinanceStore((s) => s.accounts)
   const investments = useFinanceStore((s) => s.investments)
+  const assets = useFinanceStore((s) => s.assets)
   const priorityConfig = useFinanceStore((s) => s.priorityConfig)
   const settings = useFinanceStore((s) => s.settings)
   const rates = settings.exchangeRates
@@ -76,15 +77,19 @@ export function Dashboard() {
     const invILS = investments.reduce(
       (s, i) => s + convertAmount(i.balance, i.currency, 'ILS', rates), 0
     )
-    const netWorthILS = liquidILS + depositsILS + stocksILS + invILS
+    const assetsILS = assets.reduce(
+      (s, a) => s + convertAmount(a.value, a.currency, 'ILS', rates), 0
+    )
+    const netWorthILS = liquidILS + depositsILS + stocksILS + invILS + assetsILS
     const toDisplay = (v: number) => convertAmount(v, 'ILS', displayCurrency, rates)
     return {
       netWorth: toDisplay(netWorthILS),
       liquid: toDisplay(liquidILS),
       deposits: toDisplay(depositsILS),
       inv: toDisplay(invILS),
+      assets: toDisplay(assetsILS),
     }
-  }, [accounts, investments, rates, displayCurrency])
+  }, [accounts, investments, assets, rates, displayCurrency])
 
   const portfolioReturn = useMemo(
     () => portfolioWeightedReturn(snapshots, investments.map((i) => i.id)),
@@ -96,7 +101,7 @@ export function Dashboard() {
     [accounts, investments, priorityConfig, rates]
   )
 
-  if (accounts.length === 0 && investments.length === 0) {
+  if (accounts.length === 0 && investments.length === 0 && assets.length === 0) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center px-6 pb-20 md:pb-0">
         <div className="w-14 h-14 rounded-2xl bg-[#161B22] border border-white/8 flex items-center justify-center mb-4">
@@ -136,6 +141,7 @@ export function Dashboard() {
             </span>
           )}
         </div>
+        <KPICard label="Assets" value={totals.assets} currency={displayCurrency} />
       </div>
 
       {/* Scrollable body */}
@@ -228,6 +234,41 @@ export function Dashboard() {
                           </p>
                         )
                       })()}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Assets */}
+        {assets.length > 0 && (
+          <div>
+            <p className="text-[10px] font-semibold text-[#484F58] uppercase tracking-widest mb-2">Assets</p>
+            <div className="space-y-2">
+              {assets.map((asset) => {
+                const assetILS = convertAmount(asset.value, asset.currency, 'ILS', rates)
+                return (
+                  <div key={asset.id} className="glass-card px-4 py-3 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center shrink-0">
+                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                        <path d="M1 13V7l6-4.5L13 7v6H1z" stroke="#F59E0B" strokeWidth="1.3" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[#E6EDF3] truncate">{asset.name}</p>
+                      <p className="text-[10px] text-[#484F58] capitalize">{asset.category.replace('_', ' ')}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-mono text-sm font-semibold text-[#F59E0B]">
+                        {formatCurrency(assetILS, 'ILS')}
+                      </p>
+                      {asset.currency !== 'ILS' && (
+                        <p className="text-[10px] text-[#484F58] font-mono">
+                          {formatCurrency(asset.value, asset.currency)}
+                        </p>
+                      )}
                     </div>
                   </div>
                 )

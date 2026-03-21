@@ -34,6 +34,18 @@ export interface Investment {
   createdAt: string
 }
 
+export type AssetCategory = 'real_estate' | 'vehicle' | 'other'
+
+export interface Asset {
+  id: string
+  name: string
+  value: number
+  currency: string
+  category: AssetCategory
+  description: string
+  createdAt: string
+}
+
 export interface InvestmentSnapshot {
   id: string
   investmentId: string
@@ -207,6 +219,29 @@ const SAMPLE_SNAPSHOTS: InvestmentSnapshot[] = [
   { id: 'snap-t5', investmentId: 'inv-2', value: 68000, currency: 'ILS', valueILS: 68000, note: '', recordedAt: _d(0) },
 ]
 
+// ── Sample assets ─────────────────────────────────────────────────────────────
+
+const SAMPLE_ASSETS: Asset[] = [
+  {
+    id: 'asset-1',
+    name: 'Apartment — Tel Aviv',
+    value: 2000000,
+    currency: 'ILS',
+    category: 'real_estate',
+    description: '3-bedroom apartment in central Tel Aviv.',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'asset-2',
+    name: 'Toyota Corolla',
+    value: 25000,
+    currency: 'USD',
+    category: 'vehicle',
+    description: '2021 Toyota Corolla.',
+    createdAt: new Date().toISOString(),
+  },
+]
+
 // ── Priority builder ──────────────────────────────────────────────────────────
 
 function buildPriorityFromData(accounts: BankAccount[], investments: Investment[]): PriorityItem[] {
@@ -240,6 +275,7 @@ function buildSyncedPriority(
 interface FinanceState {
   accounts: BankAccount[]
   investments: Investment[]
+  assets: Asset[]
   snapshots: InvestmentSnapshot[]
   trackingSettings: InvestmentTracking[]
   priorityConfig: PriorityItem[]
@@ -254,6 +290,10 @@ interface FinanceState {
   addInvestment: (data: Omit<Investment, 'id' | 'createdAt'>) => void
   updateInvestment: (id: string, data: Partial<Investment>) => void
   deleteInvestment: (id: string) => void
+
+  addAsset: (data: Omit<Asset, 'id' | 'createdAt'>) => void
+  updateAsset: (id: string, data: Partial<Asset>) => void
+  deleteAsset: (id: string) => void
 
   addSnapshot: (
     investmentId: string,
@@ -284,6 +324,7 @@ export const useFinanceStore = create<FinanceState>()(
     (set) => ({
       accounts: [],
       investments: [],
+      assets: [],
       snapshots: [],
       trackingSettings: [],
       priorityConfig: [],
@@ -370,6 +411,19 @@ export const useFinanceStore = create<FinanceState>()(
           trackingSettings: state.trackingSettings.filter((t) => t.investmentId !== id),
           priorityConfig: state.priorityConfig.filter((p) => !(p.type === 'investment' && p.id === id)),
         }))
+      },
+
+      addAsset: (data) => {
+        const asset: Asset = { ...data, id: `asset-${Date.now()}`, createdAt: new Date().toISOString() }
+        set((state) => ({ assets: [...state.assets, asset] }))
+      },
+
+      updateAsset: (id, data) => {
+        set((state) => ({ assets: state.assets.map((a) => (a.id === id ? { ...a, ...data } : a)) }))
+      },
+
+      deleteAsset: (id) => {
+        set((state) => ({ assets: state.assets.filter((a) => a.id !== id) }))
       },
 
       addSnapshot: (investmentId, value, currency, recordedAt, note, rates) => {
@@ -502,6 +556,7 @@ export const useFinanceStore = create<FinanceState>()(
         if (state && state.accounts.length === 0 && state.investments.length === 0) {
           state.accounts = SAMPLE_ACCOUNTS
           state.investments = SAMPLE_INVESTMENTS
+          state.assets = SAMPLE_ASSETS
           state.snapshots = SAMPLE_SNAPSHOTS
           state.priorityConfig = buildPriorityFromData(SAMPLE_ACCOUNTS, SAMPLE_INVESTMENTS)
           state.sampleDataLoaded = true
@@ -516,6 +571,8 @@ export const useFinanceStore = create<FinanceState>()(
           if (!(['ILS','USD','EUR','GBP'] as string[]).includes(state.settings.displayCurrency)) {
             state.settings.displayCurrency = 'ILS'
           }
+          // Migrate assets
+          if (!state.assets) state.assets = []
           // Migrate snapshots / trackingSettings
           if (!state.snapshots) state.snapshots = []
           if (!state.trackingSettings) state.trackingSettings = []
