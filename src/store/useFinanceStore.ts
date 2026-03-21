@@ -34,6 +34,24 @@ export interface Investment {
   createdAt: string
 }
 
+export interface InvestmentSnapshot {
+  id: string
+  investmentId: string
+  value: number
+  currency: string
+  valueILS: number      // pre-converted at snapshot time
+  note: string
+  recordedAt: string    // ISO — can be backdated
+}
+
+export type TrackingFrequency = 'monthly' | 'quarterly' | 'custom'
+
+export interface InvestmentTracking {
+  investmentId: string
+  frequency: TrackingFrequency
+  lastLoggedAt: string | null
+}
+
 export interface PriorityItem {
   type: 'bank_balance' | 'bank_savings' | 'bank_deposits' | 'investment'
   id?: string
@@ -166,6 +184,29 @@ const SAMPLE_INVESTMENTS: Investment[] = [
   },
 ]
 
+// Sample snapshots for demo — multiple months of history
+const _d = (monthsAgo: number) => {
+  const d = new Date()
+  d.setMonth(d.getMonth() - monthsAgo)
+  return d.toISOString()
+}
+const DEFAULT_RATES = DEFAULT_SETTINGS.exchangeRates
+
+const SAMPLE_SNAPSHOTS: InvestmentSnapshot[] = [
+  // S&P 500 ETF (USD) — 5 snapshots over 5 months
+  { id: 'snap-s1', investmentId: 'inv-1', value: 28000, currency: 'USD', valueILS: 28000 * DEFAULT_RATES.USD_ILS, note: 'Initial', recordedAt: _d(4) },
+  { id: 'snap-s2', investmentId: 'inv-1', value: 30500, currency: 'USD', valueILS: 30500 * DEFAULT_RATES.USD_ILS, note: '', recordedAt: _d(3) },
+  { id: 'snap-s3', investmentId: 'inv-1', value: 31800, currency: 'USD', valueILS: 31800 * DEFAULT_RATES.USD_ILS, note: '', recordedAt: _d(2) },
+  { id: 'snap-s4', investmentId: 'inv-1', value: 33100, currency: 'USD', valueILS: 33100 * DEFAULT_RATES.USD_ILS, note: '', recordedAt: _d(1) },
+  { id: 'snap-s5', investmentId: 'inv-1', value: 34200, currency: 'USD', valueILS: 34200 * DEFAULT_RATES.USD_ILS, note: '', recordedAt: _d(0) },
+  // Tech Trust Fund (ILS) — 5 snapshots
+  { id: 'snap-t1', investmentId: 'inv-2', value: 60000, currency: 'ILS', valueILS: 60000, note: 'Initial', recordedAt: _d(4) },
+  { id: 'snap-t2', investmentId: 'inv-2', value: 62500, currency: 'ILS', valueILS: 62500, note: '', recordedAt: _d(3) },
+  { id: 'snap-t3', investmentId: 'inv-2', value: 63800, currency: 'ILS', valueILS: 63800, note: '', recordedAt: _d(2) },
+  { id: 'snap-t4', investmentId: 'inv-2', value: 65500, currency: 'ILS', valueILS: 65500, note: '', recordedAt: _d(1) },
+  { id: 'snap-t5', investmentId: 'inv-2', value: 68000, currency: 'ILS', valueILS: 68000, note: '', recordedAt: _d(0) },
+]
+
 // ── Priority builder ──────────────────────────────────────────────────────────
 
 function buildPriorityFromData(accounts: BankAccount[], investments: Investment[]): PriorityItem[] {
@@ -199,6 +240,8 @@ function buildSyncedPriority(
 interface FinanceState {
   accounts: BankAccount[]
   investments: Investment[]
+  snapshots: InvestmentSnapshot[]
+  trackingSettings: InvestmentTracking[]
   priorityConfig: PriorityItem[]
   settings: AppSettings
   sampleDataLoaded: boolean
@@ -212,6 +255,17 @@ interface FinanceState {
   updateInvestment: (id: string, data: Partial<Investment>) => void
   deleteInvestment: (id: string) => void
 
+  addSnapshot: (
+    investmentId: string,
+    value: number,
+    currency: string,
+    recordedAt: string,
+    note: string,
+    rates: AppSettings['exchangeRates']
+  ) => void
+  deleteSnapshot: (snapshotId: string) => void
+  updateTrackingSettings: (investmentId: string, patch: Partial<InvestmentTracking>) => void
+
   reorderPriority: (newOrder: PriorityItem[]) => void
   applyRecommendation: (action: RecommendationAction) => void
   updateSettings: (s: Partial<AppSettings>) => void
@@ -223,6 +277,8 @@ export const useFinanceStore = create<FinanceState>()(
     (set) => ({
       accounts: [],
       investments: [],
+      snapshots: [],
+      trackingSettings: [],
       priorityConfig: [],
       settings: DEFAULT_SETTINGS,
       sampleDataLoaded: false,
@@ -260,10 +316,31 @@ export const useFinanceStore = create<FinanceState>()(
       },
 
       addInvestment: (data) => {
-        const investment: Investment = { ...data, id: `inv-${Date.now()}`, createdAt: new Date().toISOString() }
+        const id = `inv-${Date.now()}`
+        const now = new Date().toISOString()
+        const investment: Investment = { ...data, id, createdAt: now }
         set((state) => {
           const investments = [...state.investments, investment]
-          return { investments, priorityConfig: buildSyncedPriority(state.priorityConfig, state.accounts, investments) }
+          // Create initial snapshot if balance > 0
+          const snapshots = data.balance > 0
+            ? [
+                ...state.snapshots,
+                {
+                  id: `snap-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                  investmentId: id,
+                  value: data.balance,
+                  currency: data.currency,
+                  valueILS: convertAmount(data.balance, data.currency, 'ILS', state.settings.exchangeRates),
+                  note: 'Initial value',
+                  recordedAt: now,
+                } as InvestmentSnapshot,
+              ]
+            : state.snapshots
+          return {
+            investments,
+            snapshots,
+            priorityConfig: buildSyncedPriority(state.priorityConfig, state.accounts, investments),
+          }
         })
       },
 
@@ -282,8 +359,75 @@ export const useFinanceStore = create<FinanceState>()(
       deleteInvestment: (id) => {
         set((state) => ({
           investments: state.investments.filter((i) => i.id !== id),
+          snapshots: state.snapshots.filter((s) => s.investmentId !== id),
+          trackingSettings: state.trackingSettings.filter((t) => t.investmentId !== id),
           priorityConfig: state.priorityConfig.filter((p) => !(p.type === 'investment' && p.id === id)),
         }))
+      },
+
+      addSnapshot: (investmentId, value, currency, recordedAt, note, rates) => {
+        set((state) => {
+          const valueILS = convertAmount(value, currency, 'ILS', rates)
+          const snapshot: InvestmentSnapshot = {
+            id: `snap-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            investmentId,
+            value,
+            currency,
+            valueILS,
+            note,
+            recordedAt,
+          }
+          // Update investment.balance to match new snapshot value
+          const investments = state.investments.map((i) =>
+            i.id === investmentId ? { ...i, balance: value } : i
+          )
+          // Update lastLoggedAt in trackingSettings
+          const existingTracking = state.trackingSettings.find((t) => t.investmentId === investmentId)
+          const trackingSettings = existingTracking
+            ? state.trackingSettings.map((t) =>
+                t.investmentId === investmentId ? { ...t, lastLoggedAt: recordedAt } : t
+              )
+            : [
+                ...state.trackingSettings,
+                { investmentId, frequency: 'monthly' as TrackingFrequency, lastLoggedAt: recordedAt },
+              ]
+          return { snapshots: [...state.snapshots, snapshot], investments, trackingSettings }
+        })
+      },
+
+      deleteSnapshot: (snapshotId) => {
+        set((state) => {
+          const snap = state.snapshots.find((s) => s.id === snapshotId)
+          if (!snap) return {}
+          const remaining = state.snapshots.filter((s) => s.id !== snapshotId)
+          // Sync investment.balance to latest remaining snapshot for this investment
+          const sibling = [...remaining]
+            .filter((s) => s.investmentId === snap.investmentId)
+            .sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0]
+          const investments = state.investments.map((i) =>
+            i.id === snap.investmentId ? { ...i, balance: sibling?.value ?? i.balance } : i
+          )
+          return { snapshots: remaining, investments }
+        })
+      },
+
+      updateTrackingSettings: (investmentId, patch) => {
+        set((state) => {
+          const exists = state.trackingSettings.some((t) => t.investmentId === investmentId)
+          if (exists) {
+            return {
+              trackingSettings: state.trackingSettings.map((t) =>
+                t.investmentId === investmentId ? { ...t, ...patch } : t
+              ),
+            }
+          }
+          return {
+            trackingSettings: [
+              ...state.trackingSettings,
+              { investmentId, frequency: 'monthly', lastLoggedAt: null, ...patch },
+            ],
+          }
+        })
       },
 
       reorderPriority: (newOrder) => set({ priorityConfig: newOrder }),
@@ -332,6 +476,7 @@ export const useFinanceStore = create<FinanceState>()(
         if (state && state.accounts.length === 0 && state.investments.length === 0) {
           state.accounts = SAMPLE_ACCOUNTS
           state.investments = SAMPLE_INVESTMENTS
+          state.snapshots = SAMPLE_SNAPSHOTS
           state.priorityConfig = buildPriorityFromData(SAMPLE_ACCOUNTS, SAMPLE_INVESTMENTS)
           state.sampleDataLoaded = true
           state.sampleDataDismissed = false
@@ -344,6 +489,24 @@ export const useFinanceStore = create<FinanceState>()(
           if (!state.settings.exchangeRates.GBP_ILS) state.settings.exchangeRates.GBP_ILS = 4.60
           if (!(['ILS','USD','EUR','GBP'] as string[]).includes(state.settings.displayCurrency)) {
             state.settings.displayCurrency = 'ILS'
+          }
+          // Migrate snapshots / trackingSettings
+          if (!state.snapshots) state.snapshots = []
+          if (!state.trackingSettings) state.trackingSettings = []
+          // Seed one snapshot per existing investment that has no snapshot yet
+          for (const inv of state.investments) {
+            const hasSnap = state.snapshots.some((s) => s.investmentId === inv.id)
+            if (!hasSnap && inv.balance > 0) {
+              state.snapshots.push({
+                id: `snap-migrate-${inv.id}`,
+                investmentId: inv.id,
+                value: inv.balance,
+                currency: inv.currency,
+                valueILS: convertAmount(inv.balance, inv.currency, 'ILS', state.settings.exchangeRates),
+                note: 'Initial value',
+                recordedAt: inv.createdAt,
+              })
+            }
           }
         }
       },

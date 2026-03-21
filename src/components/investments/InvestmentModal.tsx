@@ -23,10 +23,12 @@ export function InvestmentModal({ open, onClose, onSubmit, initial }: Investment
   const [description, setDescription] = useState(initial?.description ?? '')
   const [errors, setErrors] = useState<{ name?: string; balance?: string }>({})
 
+  const isEdit = !!initial?.name
+
   const validate = () => {
     const errs: typeof errors = {}
     if (!name.trim()) errs.name = 'Name required'
-    if (!balance) errs.balance = 'Value required'
+    if (!isEdit && !balance) errs.balance = 'Value required'
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -49,32 +51,39 @@ export function InvestmentModal({ open, onClose, onSubmit, initial }: Investment
           error={errors.name}
         />
 
-        {/* Value + currency */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#7D8590] uppercase tracking-wider block">Current Value</label>
-          <div className="flex gap-1.5">
-            <input
-              placeholder="0.00"
-              value={balance}
-              onChange={(e) => {
-                const v = autoFormatInput(e.target.value)
-                setBalance(v)
-                setErrors((err) => ({ ...err, balance: undefined }))
-              }}
-              className={`flex-1 bg-[#0D1117] border rounded-lg px-3 py-2 text-sm text-[#E6EDF3] font-mono placeholder:text-[#484F58] outline-none transition-colors ${
-                errors.balance ? 'border-[#F87171]/50' : 'border-white/10 focus:border-[#00D4AA]/50'
-              }`}
-            />
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className="bg-[#0D1117] border border-white/10 rounded-lg px-2 py-2 text-xs text-[#7D8590] outline-none focus:border-[#00D4AA]/50 transition-colors w-16"
-            >
-              {FIELD_CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
+        {/* Value + currency — only shown when adding, not editing */}
+        {!isEdit && (
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[#7D8590] uppercase tracking-wider block">Current Value</label>
+            <div className="flex gap-1.5">
+              <input
+                placeholder="0.00"
+                value={balance}
+                onChange={(e) => {
+                  const v = autoFormatInput(e.target.value)
+                  setBalance(v)
+                  setErrors((err) => ({ ...err, balance: undefined }))
+                }}
+                className={`flex-1 bg-[#0D1117] border rounded-lg px-3 py-2 text-sm text-[#E6EDF3] font-mono placeholder:text-[#484F58] outline-none transition-colors ${
+                  errors.balance ? 'border-[#F87171]/50' : 'border-white/10 focus:border-[#00D4AA]/50'
+                }`}
+              />
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="bg-[#0D1117] border border-white/10 rounded-lg px-2 py-2 text-xs text-[#7D8590] outline-none focus:border-[#00D4AA]/50 transition-colors w-16"
+              >
+                {FIELD_CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            {errors.balance && <p className="text-xs text-[#F87171]">{errors.balance}</p>}
           </div>
-          {errors.balance && <p className="text-xs text-[#F87171]">{errors.balance}</p>}
-        </div>
+        )}
+        {isEdit && (
+          <p className="text-xs text-[#484F58] bg-[#161B22] border border-white/8 rounded-lg px-3 py-2">
+            Use "Log Value" on the card to update the balance.
+          </p>
+        )}
 
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-[#7D8590] uppercase tracking-wider">Description</label>

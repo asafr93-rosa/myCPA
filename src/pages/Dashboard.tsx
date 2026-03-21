@@ -3,6 +3,7 @@ import { useFinanceStore, computeTotalBalance } from '../store/useFinanceStore'
 import { AnimatedCounter } from '../components/ui/AnimatedCounter'
 import { formatCurrency, convertAmount } from '../lib/formatters'
 import { computeRecommendations } from '../lib/recommendations'
+import { portfolioWeightedReturn, totalReturnPct } from '../lib/investmentMetrics'
 import { Link } from 'react-router-dom'
 
 function KPICard({ label, value, currency, isNegative = false }: {
@@ -62,6 +63,8 @@ export function Dashboard() {
   const rates = settings.exchangeRates
   const displayCurrency = settings.displayCurrency
 
+  const snapshots = useFinanceStore((s) => s.snapshots)
+
   const totals = useMemo(() => {
     const liquidILS = accounts.reduce((s, a) => s + computeTotalBalance(a, rates), 0)
     const depositsILS = accounts.reduce(
@@ -82,6 +85,11 @@ export function Dashboard() {
       inv: toDisplay(invILS),
     }
   }, [accounts, investments, rates, displayCurrency])
+
+  const portfolioReturn = useMemo(
+    () => portfolioWeightedReturn(snapshots, investments.map((i) => i.id)),
+    [snapshots, investments]
+  )
 
   const suggestions = useMemo(
     () => computeRecommendations(accounts, investments, priorityConfig, rates),
@@ -119,7 +127,15 @@ export function Dashboard() {
         <KPICard label="Net Worth" value={totals.netWorth} currency={displayCurrency} isNegative={totals.netWorth < 0} />
         <KPICard label="Liquid" value={totals.liquid} currency={displayCurrency} isNegative={totals.liquid < 0} />
         <KPICard label="Deposits" value={totals.deposits} currency={displayCurrency} />
-        <KPICard label="Investments" value={totals.inv} currency={displayCurrency} />
+        <div className="glass-card px-4 py-3 flex flex-col gap-0.5">
+          <span className="text-[10px] font-medium text-[#484F58] uppercase tracking-widest">Investments</span>
+          <AnimatedCounter value={totals.inv} currency={displayCurrency} className="text-lg font-semibold font-mono text-[#E6EDF3]" />
+          {portfolioReturn !== null && (
+            <span className={`text-[10px] font-mono font-semibold ${portfolioReturn >= 0 ? 'text-[#00D4AA]' : 'text-[#F87171]'}`}>
+              {portfolioReturn >= 0 ? '+' : ''}{portfolioReturn.toFixed(2)}% all time
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Scrollable body */}
@@ -203,6 +219,15 @@ export function Dashboard() {
                           {formatCurrency(inv.balance, inv.currency)}
                         </p>
                       )}
+                      {(() => {
+                        const ret = totalReturnPct(snapshots, inv.id)
+                        if (ret === null) return null
+                        return (
+                          <p className={`text-[10px] font-mono font-semibold ${ret >= 0 ? 'text-[#00D4AA]' : 'text-[#F87171]'}`}>
+                            {ret >= 0 ? '+' : ''}{ret.toFixed(1)}%
+                          </p>
+                        )
+                      })()}
                     </div>
                   </div>
                 )
