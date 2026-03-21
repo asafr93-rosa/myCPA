@@ -35,6 +35,16 @@ const NAV_ITEMS = [
     ),
   },
   {
+    path: '/assets',
+    label: 'Assets',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
+        <path d="M1.5 17V8.5L9 3l7.5 5.5V17H1.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+        <path d="M6.5 17v-5h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
     path: '/advisor',
     label: 'AI',
     icon: (
@@ -42,16 +52,6 @@ const NAV_ITEMS = [
         <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.5"/>
         <path d="M6.5 7.5C6.5 6.12 7.62 5 9 5s2.5 1.12 2.5 2.5c0 1.5-1.5 2.5-2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
         <circle cx="9" cy="13" r="0.75" fill="currentColor"/>
-      </svg>
-    ),
-  },
-  {
-    path: '/assets',
-    label: 'Assets',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
-        <path d="M1.5 17V8.5L9 3l7.5 5.5V17H1.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-        <path d="M6.5 17v-5h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
       </svg>
     ),
   },

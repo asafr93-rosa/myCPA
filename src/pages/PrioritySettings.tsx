@@ -293,7 +293,12 @@ const TYPE_LABELS: Record<PriorityItem['type'], string> = {
   bank_balance: 'Balance', bank_savings: 'Savings', bank_deposits: 'Deposits', investment: 'Investment',
 }
 
-function SortableItem({ item, index }: { item: PriorityItem; index: number }) {
+function SortableItem({
+  item, index, isFirst, isLast, onMoveUp, onMoveDown,
+}: {
+  item: PriorityItem; index: number; isFirst: boolean; isLast: boolean
+  onMoveUp: () => void; onMoveDown: () => void
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `${item.type}:${item.id}`,
   })
@@ -301,10 +306,10 @@ function SortableItem({ item, index }: { item: PriorityItem; index: number }) {
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
-      className={`glass-card flex items-center gap-3 px-4 py-3 ${isDragging ? 'shadow-2xl z-50' : ''}`}
+      className={`glass-card flex items-center gap-3 px-4 py-3 min-h-[52px] ${isDragging ? 'shadow-2xl z-50' : ''}`}
     >
       <span className="font-mono text-xs text-[#484F58] w-5 shrink-0 text-center">{index + 1}</span>
-      <button {...attributes} {...listeners} className="text-[#484F58] hover:text-[#7D8590] cursor-grab active:cursor-grabbing p-0.5 shrink-0">
+      <button {...attributes} {...listeners} className="text-[#484F58] hover:text-[#7D8590] cursor-grab active:cursor-grabbing p-0.5 shrink-0 hidden sm:flex">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <circle cx="5" cy="4" r="1" fill="currentColor"/><circle cx="9" cy="4" r="1" fill="currentColor"/>
           <circle cx="5" cy="7" r="1" fill="currentColor"/><circle cx="9" cy="7" r="1" fill="currentColor"/>
@@ -320,6 +325,29 @@ function SortableItem({ item, index }: { item: PriorityItem; index: number }) {
         style={{ color: TYPE_COLORS[item.type], background: `${TYPE_COLORS[item.type]}15` }}>
         {TYPE_LABELS[item.type]}
       </span>
+      {/* Arrow buttons — primary mobile reorder control */}
+      <div className="flex flex-col gap-0.5 shrink-0">
+        <button
+          type="button"
+          onClick={onMoveUp}
+          disabled={isFirst}
+          className="w-7 h-7 rounded-md flex items-center justify-center text-[#7D8590] hover:text-[#E6EDF3] hover:bg-white/5 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 9V3M3 6l3-3 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={onMoveDown}
+          disabled={isLast}
+          className="w-7 h-7 rounded-md flex items-center justify-center text-[#7D8590] hover:text-[#E6EDF3] hover:bg-white/5 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 3v6M3 6l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
     </div>
   )
 }
@@ -340,11 +368,18 @@ function PrioritySection() {
     if (oldIndex !== -1 && newIndex !== -1) reorderPriority(arrayMove(priorityConfig, oldIndex, newIndex))
   }
 
+  const moveItem = (from: number, to: number) => {
+    const next = [...priorityConfig]
+    const [item] = next.splice(from, 1)
+    next.splice(to, 0, item)
+    reorderPriority(next)
+  }
+
   return (
     <div className="space-y-5">
       <div>
         <h2 className="text-base font-semibold text-[#E6EDF3]">Priority Order</h2>
-        <p className="text-sm text-[#7D8590]">Drag to set how funds are used for suggestions</p>
+        <p className="text-sm text-[#7D8590]">Use arrows (or drag on desktop) to set how funds are used for suggestions</p>
       </div>
 
       <div className="glass-card p-4 flex items-start gap-3 mb-1">
@@ -365,7 +400,15 @@ function PrioritySection() {
           <SortableContext items={priorityConfig.map((p) => `${p.type}:${p.id}`)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {priorityConfig.map((item, index) => (
-                <SortableItem key={`${item.type}:${item.id}`} item={item} index={index} />
+                <SortableItem
+                  key={`${item.type}:${item.id}`}
+                  item={item}
+                  index={index}
+                  isFirst={index === 0}
+                  isLast={index === priorityConfig.length - 1}
+                  onMoveUp={() => moveItem(index, index - 1)}
+                  onMoveDown={() => moveItem(index, index + 1)}
+                />
               ))}
             </div>
           </SortableContext>

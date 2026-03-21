@@ -15,7 +15,6 @@ export function AccountCard({ account, onEdit, onDelete }: AccountCardProps) {
   const isNegative = totalILS < 0
 
   const depositsILS = convertAmount(account.deposits, account.depositsCurrency, 'ILS', rates)
-  const stockILS = convertAmount(account.stockBalance, account.stockCurrency, 'ILS', rates)
 
   return (
     <div className="glass-card p-5 space-y-4">
@@ -98,20 +97,6 @@ export function AccountCard({ account, onEdit, onDelete }: AccountCardProps) {
           </div>
         </div>
 
-        {/* Stock Exchange */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-[#7D8590]">Stocks</span>
-          <div className="text-right">
-            <span className="font-mono text-sm text-[#58A6FF]">
-              {formatCurrency(stockILS, 'ILS')}
-            </span>
-            {account.stockCurrency !== 'ILS' && account.stockBalance > 0 && (
-              <p className="text-[10px] text-[#484F58] font-mono">
-                {formatCurrency(account.stockBalance, account.stockCurrency)} native
-              </p>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   )

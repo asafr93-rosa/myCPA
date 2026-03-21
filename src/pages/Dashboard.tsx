@@ -144,6 +144,35 @@ export function Dashboard() {
         <KPICard label="Assets" value={totals.assets} currency={displayCurrency} />
       </div>
 
+      {/* Suggestions — right below KPI cards (mobile only; desktop shows in right panel) */}
+      <div className="lg:hidden shrink-0 px-5 pb-3">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#00D4AA] animate-pulse" />
+          <p className="text-[10px] font-semibold text-[#484F58] uppercase tracking-widest">Suggestions</p>
+        </div>
+        {suggestions.length === 0 ? (
+          <div className="glass-card px-4 py-3 flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-[#00D4AA]/10 flex items-center justify-center shrink-0">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2.5 6l2.5 2.5 5-5" stroke="#00D4AA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <p className="text-xs text-[#7D8590]">All accounts are healthy</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {suggestions.map((s) => (
+              <SuggestionPill
+                key={s.id}
+                message={s.message}
+                amount={s.amountILS}
+                color={SUGGESTION_COLORS[s.type]}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Scrollable body */}
       <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-24 md:pb-6 space-y-5">
 
@@ -277,34 +306,6 @@ export function Dashboard() {
           </div>
         )}
 
-        {/* Suggestions — mobile only (desktop shows in right panel) */}
-        <div className="lg:hidden">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#00D4AA] animate-pulse" />
-            <p className="text-[10px] font-semibold text-[#484F58] uppercase tracking-widest">Suggestions</p>
-          </div>
-          {suggestions.length === 0 ? (
-            <div className="glass-card px-4 py-3 flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-[#00D4AA]/10 flex items-center justify-center shrink-0">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M2.5 6l2.5 2.5 5-5" stroke="#00D4AA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <p className="text-xs text-[#7D8590]">All accounts are healthy</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {suggestions.map((s) => (
-                <SuggestionPill
-                  key={s.id}
-                  message={s.message}
-                  amount={s.amountILS}
-                  color={SUGGESTION_COLORS[s.type]}
-                />
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   )

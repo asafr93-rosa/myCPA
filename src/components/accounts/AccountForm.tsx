@@ -144,11 +144,6 @@ export function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
   )
   const [depositsCurrency, setDepositsCurrency] = useState(initial?.depositsCurrency ?? 'ILS')
 
-  const [stockBalance, setStockBalance] = useState(
-    initial?.stockBalance !== undefined ? autoFormatInput(String(initial.stockBalance)) : ''
-  )
-  const [stockCurrency, setStockCurrency] = useState(initial?.stockCurrency ?? 'ILS')
-
   const [color, setColor] = useState(initial?.color ?? ACCOUNT_COLORS[0])
   const [errors, setErrors] = useState<{ name?: string; balance?: string }>({})
 
@@ -180,8 +175,8 @@ export function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
       savings: initial?.savings ?? 0,
       deposits: parseFormattedNumber(deposits),
       depositsCurrency,
-      stockBalance: parseFormattedNumber(stockBalance),
-      stockCurrency,
+      stockBalance: initial?.stockBalance ?? 0,
+      stockCurrency: initial?.stockCurrency ?? 'ILS',
       color,
     })
   }
@@ -255,23 +250,6 @@ export function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
           <CurrencySelect value={depositsCurrency} onChange={setDepositsCurrency} />
         </div>
       </div>
-
-      {/* Stock Exchange */}
-      <div className="space-y-1.5">
-        <p className="text-xs font-semibold text-[#7D8590] uppercase tracking-wider">Stocks</p>
-        <div className="flex items-center gap-1.5">
-          <input
-            inputMode="decimal"
-            placeholder="0.00"
-            value={stockBalance}
-            onChange={(e) => setStockBalance(autoFormatInput(e.target.value))}
-            className="flex-1 bg-[#0D1117] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#E6EDF3] font-mono placeholder:text-[#484F58] outline-none focus:border-[#00D4AA]/50 transition-colors"
-          />
-          <CurrencySelect value={stockCurrency} onChange={setStockCurrency} />
-        </div>
-      </div>
-
-      <div className="border-t border-white/8" />
 
       {/* Color picker */}
       <div className="space-y-2">
