@@ -57,6 +57,7 @@ export function InvestmentModal({ open, onClose, onSubmit, initial }: Investment
             <label className="text-xs font-medium text-[#7D8590] uppercase tracking-wider block">Current Value</label>
             <div className="flex gap-1.5">
               <input
+                inputMode="decimal"
                 placeholder="0.00"
                 value={balance}
                 onChange={(e) => {

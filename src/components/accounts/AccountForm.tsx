@@ -45,6 +45,7 @@ function ItemRow({ item, isFirst, onUpdate, onRemove }: ItemRowProps) {
         className="flex-1 min-w-0 bg-[#0D1117] border border-white/10 rounded-lg px-2.5 py-1.5 text-sm text-[#E6EDF3] placeholder:text-[#484F58] outline-none focus:border-white/20 transition-colors"
       />
       <input
+        inputMode="decimal"
         placeholder="0.00"
         value={amountStr}
         onChange={(e) => {
@@ -201,6 +202,7 @@ export function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
         <p className="text-xs font-semibold text-[#7D8590] uppercase tracking-wider">Current Balance</p>
         <div className="flex items-center gap-1.5">
           <input
+            inputMode="decimal"
             placeholder="0.00"
             value={balance}
             onChange={(e) => {
@@ -244,6 +246,7 @@ export function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
         <p className="text-xs font-semibold text-[#7D8590] uppercase tracking-wider">Deposits</p>
         <div className="flex items-center gap-1.5">
           <input
+            inputMode="decimal"
             placeholder="0.00"
             value={deposits}
             onChange={(e) => setDeposits(autoFormatInput(e.target.value))}
@@ -258,6 +261,7 @@ export function AccountForm({ initial, onSubmit, onCancel }: AccountFormProps) {
         <p className="text-xs font-semibold text-[#7D8590] uppercase tracking-wider">Stocks</p>
         <div className="flex items-center gap-1.5">
           <input
+            inputMode="decimal"
             placeholder="0.00"
             value={stockBalance}
             onChange={(e) => setStockBalance(autoFormatInput(e.target.value))}

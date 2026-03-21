@@ -263,6 +263,13 @@ interface FinanceState {
     note: string,
     rates: AppSettings['exchangeRates']
   ) => void
+  updateSnapshot: (
+    snapshotId: string,
+    value: number,
+    recordedAt: string,
+    note: string,
+    rates: AppSettings['exchangeRates']
+  ) => void
   deleteSnapshot: (snapshotId: string) => void
   updateTrackingSettings: (investmentId: string, patch: Partial<InvestmentTracking>) => void
 
@@ -392,6 +399,25 @@ export const useFinanceStore = create<FinanceState>()(
                 { investmentId, frequency: 'monthly' as TrackingFrequency, lastLoggedAt: recordedAt },
               ]
           return { snapshots: [...state.snapshots, snapshot], investments, trackingSettings }
+        })
+      },
+
+      updateSnapshot: (snapshotId, value, recordedAt, note, rates) => {
+        set((state) => {
+          const snap = state.snapshots.find((s) => s.id === snapshotId)
+          if (!snap) return {}
+          const valueILS = convertAmount(value, snap.currency, 'ILS', rates)
+          const snapshots = state.snapshots.map((s) =>
+            s.id === snapshotId ? { ...s, value, valueILS, recordedAt, note } : s
+          )
+          // Sync investment.balance to latest snapshot
+          const sorted = snapshots
+            .filter((s) => s.investmentId === snap.investmentId)
+            .sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())
+          const investments = state.investments.map((i) =>
+            i.id === snap.investmentId ? { ...i, balance: sorted[0]?.value ?? i.balance } : i
+          )
+          return { snapshots, investments }
         })
       },
 

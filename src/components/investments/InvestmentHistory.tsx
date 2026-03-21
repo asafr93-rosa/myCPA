@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
-import { formatCurrency, formatCompact } from '../../lib/formatters'
+import { formatCurrency, formatCompact, autoFormatInput, parseFormattedNumber } from '../../lib/formatters'
 import {
   getSnapshots,
   totalReturnPct,
@@ -30,11 +31,124 @@ function ReturnBadge({ value }: { value: number | null }) {
   )
 }
 
+interface SnapshotRowProps {
+  snapshot: InvestmentSnapshot
+  onDelete: () => void
+  onSaveEdit: (value: number, recordedAt: string, note: string) => void
+}
+
+function SnapshotRow({ snapshot, onDelete, onSaveEdit }: SnapshotRowProps) {
+  const [editing, setEditing] = useState(false)
+  const [editValue, setEditValue] = useState(autoFormatInput(String(snapshot.value)))
+  const [editDate, setEditDate] = useState(snapshot.recordedAt.slice(0, 10))
+  const [editNote, setEditNote] = useState(snapshot.note)
+
+  const handleSave = () => {
+    const num = parseFormattedNumber(editValue)
+    if (!num) return
+    onSaveEdit(num, new Date(editDate).toISOString(), editNote.trim())
+    setEditing(false)
+  }
+
+  const handleCancel = () => {
+    setEditValue(autoFormatInput(String(snapshot.value)))
+    setEditDate(snapshot.recordedAt.slice(0, 10))
+    setEditNote(snapshot.note)
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <div className="px-3 py-2.5 rounded-lg bg-[#161B22] border border-[#00D4AA]/20 space-y-2">
+        <div className="flex gap-1.5">
+          <input
+            inputMode="decimal"
+            value={editValue}
+            onChange={(e) => setEditValue(autoFormatInput(e.target.value))}
+            className="flex-1 bg-[#0D1117] border border-white/10 rounded-lg px-2.5 py-1.5 text-sm text-[#E6EDF3] font-mono outline-none focus:border-[#00D4AA]/50 transition-colors"
+          />
+          <span className="bg-[#0D1117] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-[#7D8590] flex items-center shrink-0">
+            {snapshot.currency}
+          </span>
+        </div>
+        <div className="flex gap-1.5">
+          <input
+            type="date"
+            value={editDate}
+            max={new Date().toISOString().slice(0, 10)}
+            onChange={(e) => setEditDate(e.target.value)}
+            className="flex-1 bg-[#0D1117] border border-white/10 rounded-lg px-2.5 py-1.5 text-sm text-[#E6EDF3] outline-none focus:border-[#00D4AA]/50 transition-colors"
+          />
+          <input
+            placeholder="Note"
+            value={editNote}
+            onChange={(e) => setEditNote(e.target.value)}
+            className="flex-1 bg-[#0D1117] border border-white/10 rounded-lg px-2.5 py-1.5 text-sm text-[#E6EDF3] placeholder:text-[#484F58] outline-none focus:border-[#00D4AA]/50 transition-colors"
+          />
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handleCancel}
+            className="flex-1 py-1.5 rounded-lg text-xs text-[#7D8590] bg-[#0D1117] border border-white/10 hover:border-white/20 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="flex-1 py-1.5 rounded-lg text-xs text-[#0D1117] bg-[#00D4AA] hover:bg-[#00D4AA]/90 font-semibold transition-colors"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#161B22] border border-white/5 group">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-[#E6EDF3] font-mono">{formatCurrency(snapshot.value, snapshot.currency)}</span>
+          {snapshot.currency !== 'ILS' && (
+            <span className="text-[10px] text-[#484F58] font-mono">≈ {formatCompact(snapshot.valueILS, 'ILS')}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="text-[10px] text-[#484F58]">
+            {new Date(snapshot.recordedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+          </span>
+          {snapshot.note && <span className="text-[10px] text-[#484F58] truncate">· {snapshot.note}</span>}
+        </div>
+      </div>
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={() => setEditing(true)}
+          className="text-[#7D8590] hover:text-[#E6EDF3] p-1 rounded transition-colors"
+        >
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+            <path d="M8.5 1.5l2 2L4 10H2v-2L8.5 1.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <button
+          onClick={onDelete}
+          className="text-[#F87171]/50 hover:text-[#F87171] p-1 rounded transition-colors"
+        >
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+            <path d="M2 3h8M5 3V2h2v1M10 3l-.8 7.5a.5.5 0 01-.5.5H3.3a.5.5 0 01-.5-.5L2 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function InvestmentHistory({ open, onClose, investment, onLogValue }: InvestmentHistoryProps) {
   const snapshots = useFinanceStore((s) => s.snapshots)
   const trackingSettings = useFinanceStore((s) => s.trackingSettings)
   const deleteSnapshot = useFinanceStore((s) => s.deleteSnapshot)
+  const updateSnapshot = useFinanceStore((s) => s.updateSnapshot)
   const updateTrackingSettings = useFinanceStore((s) => s.updateTrackingSettings)
+  const rates = useFinanceStore((s) => s.settings.exchangeRates)
 
   const sorted = getSnapshots(snapshots, investment.id)
   const retPct = totalReturnPct(snapshots, investment.id)
@@ -137,9 +251,14 @@ export function InvestmentHistory({ open, onClose, investment, onLogValue }: Inv
         {sorted.length > 0 && (
           <div>
             <p className="text-[10px] text-[#484F58] uppercase tracking-wider mb-2">All Snapshots</p>
-            <div className="space-y-1.5 max-h-48 overflow-y-auto overscroll-contain pr-1">
+            <div className="space-y-1.5 max-h-52 overflow-y-auto overscroll-contain pr-1">
               {[...sorted].reverse().map((s) => (
-                <SnapshotRow key={s.id} snapshot={s} onDelete={() => deleteSnapshot(s.id)} />
+                <SnapshotRow
+                  key={s.id}
+                  snapshot={s}
+                  onDelete={() => deleteSnapshot(s.id)}
+                  onSaveEdit={(value, recordedAt, note) => updateSnapshot(s.id, value, recordedAt, note, rates)}
+                />
               ))}
             </div>
           </div>
@@ -150,34 +269,5 @@ export function InvestmentHistory({ open, onClose, investment, onLogValue }: Inv
         </Button>
       </div>
     </Modal>
-  )
-}
-
-function SnapshotRow({ snapshot, onDelete }: { snapshot: InvestmentSnapshot; onDelete: () => void }) {
-  return (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#161B22] border border-white/5 group">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-[#E6EDF3] font-mono">{formatCurrency(snapshot.value, snapshot.currency)}</span>
-          {snapshot.currency !== 'ILS' && (
-            <span className="text-[10px] text-[#484F58] font-mono">≈ {formatCompact(snapshot.valueILS, 'ILS')}</span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[10px] text-[#484F58]">
-            {new Date(snapshot.recordedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </span>
-          {snapshot.note && <span className="text-[10px] text-[#484F58] truncate">· {snapshot.note}</span>}
-        </div>
-      </div>
-      <button
-        onClick={onDelete}
-        className="opacity-0 group-hover:opacity-100 text-[#F87171]/50 hover:text-[#F87171] p-1 rounded transition-all"
-      >
-        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-          <path d="M2 3h8M5 3V2h2v1M10 3l-.8 7.5a.5.5 0 01-.5.5H3.3a.5.5 0 01-.5-.5L2 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-    </div>
   )
 }

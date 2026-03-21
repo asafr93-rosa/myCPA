@@ -35,6 +35,7 @@ export function LogValueModal({ open, onClose, investment, onSubmit }: LogValueM
           <div className="flex gap-1.5">
             <input
               autoFocus
+              inputMode="decimal"
               placeholder="0.00"
               value={value}
               onChange={(e) => { setValue(autoFormatInput(e.target.value)); setError('') }}
