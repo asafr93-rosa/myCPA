@@ -4,7 +4,7 @@ import { AnimatedCounter } from '../components/ui/AnimatedCounter'
 import { formatCurrency, convertAmount } from '../lib/formatters'
 import { computeRecommendations } from '../lib/recommendations'
 import { portfolioWeightedReturn, totalReturnPct } from '../lib/investmentMetrics'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 function KPICard({ label, value, currency, isNegative = false }: {
   label: string; value: number; currency: string; isNegative?: boolean
@@ -56,6 +56,7 @@ const SUGGESTION_COLORS = {
 }
 
 export function Dashboard() {
+  const navigate = useNavigate()
   const accounts = useFinanceStore((s) => s.accounts)
   const investments = useFinanceStore((s) => s.investments)
   const assets = useFinanceStore((s) => s.assets)
@@ -160,7 +161,7 @@ export function Dashboard() {
             <p className="text-xs text-[#7D8590]">All accounts are healthy</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[28dvh] overflow-y-auto overscroll-contain">
             {suggestions.map((s) => (
               <SuggestionPill
                 key={s.id}
@@ -199,7 +200,11 @@ export function Dashboard() {
                 const total = computeTotalBalance(acc, rates)
                 const isNeg = total < 0
                 return (
-                  <div key={acc.id} className="glass-card px-4 py-3 flex items-center gap-3">
+                  <div
+                    key={acc.id}
+                    onClick={() => navigate('/accounts', { state: { scrollTo: acc.id } })}
+                    className="glass-card px-4 py-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
+                  >
                     <div
                       className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-[#0D1117] font-bold text-xs"
                       style={{ background: acc.color }}
@@ -220,6 +225,9 @@ export function Dashboard() {
                         </p>
                       )}
                     </div>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 text-[#484F58]">
+                      <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </div>
                 )
               })}
@@ -235,7 +243,11 @@ export function Dashboard() {
               {investments.map((inv) => {
                 const invILS = convertAmount(inv.balance, inv.currency, 'ILS', rates)
                 return (
-                  <div key={inv.id} className="glass-card px-4 py-3 flex items-center gap-3">
+                  <div
+                    key={inv.id}
+                    onClick={() => navigate('/investments', { state: { scrollTo: inv.id } })}
+                    className="glass-card px-4 py-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
+                  >
                     <div className="w-8 h-8 rounded-lg bg-[#C084FC]/10 border border-[#C084FC]/20 flex items-center justify-center shrink-0">
                       <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
                         <path d="M2 11l3-3 2 2 3.5-4.5 3 2.5" stroke="#C084FC" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
@@ -264,6 +276,9 @@ export function Dashboard() {
                         )
                       })()}
                     </div>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 text-[#484F58]">
+                      <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </div>
                 )
               })}
@@ -279,7 +294,11 @@ export function Dashboard() {
               {assets.map((asset) => {
                 const assetILS = convertAmount(asset.value, asset.currency, 'ILS', rates)
                 return (
-                  <div key={asset.id} className="glass-card px-4 py-3 flex items-center gap-3">
+                  <div
+                    key={asset.id}
+                    onClick={() => navigate('/assets', { state: { scrollTo: asset.id } })}
+                    className="glass-card px-4 py-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
+                  >
                     <div className="w-8 h-8 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center shrink-0">
                       <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
                         <path d="M1 13V7l6-4.5L13 7v6H1z" stroke="#F59E0B" strokeWidth="1.3" strokeLinejoin="round"/>
@@ -299,6 +318,9 @@ export function Dashboard() {
                         </p>
                       )}
                     </div>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 text-[#484F58]">
+                      <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </div>
                 )
               })}

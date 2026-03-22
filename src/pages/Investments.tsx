@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useFinanceStore } from '../store/useFinanceStore'
 import type { Investment } from '../store/useFinanceStore'
 import { InvestmentCard } from '../components/investments/InvestmentCard'
@@ -10,7 +11,26 @@ import { formatCurrency, convertAmount } from '../lib/formatters'
 import { portfolioWeightedReturn } from '../lib/investmentMetrics'
 import toast from 'react-hot-toast'
 
+function useScrollToCard() {
+  const location = useLocation()
+  useEffect(() => {
+    const id = (location.state as { scrollTo?: string } | null)?.scrollTo
+    if (!id) return
+    window.history.replaceState({}, '', location.pathname)
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`card-${id}`)
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.style.transition = 'box-shadow 0.3s'
+      el.style.boxShadow = '0 0 0 2px rgba(0,212,170,0.6)'
+      setTimeout(() => { el.style.boxShadow = '' }, 1800)
+    }, 100)
+    return () => clearTimeout(timer)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+}
+
 export function Investments() {
+  useScrollToCard()
   const investments = useFinanceStore((s) => s.investments)
   const snapshots = useFinanceStore((s) => s.snapshots)
   const rates = useFinanceStore((s) => s.settings.exchangeRates)
@@ -114,14 +134,15 @@ export function Investments() {
         ) : (
           <div className="space-y-3">
             {investments.map((inv) => (
-              <InvestmentCard
-                key={inv.id}
-                investment={inv}
-                onEdit={() => setEditingInvestment(inv)}
-                onDelete={() => handleDelete(inv.id)}
-                onLogValue={() => setLoggingInvestment(inv)}
-                onHistory={() => setHistoryInvestment(inv)}
-              />
+              <div key={inv.id} id={`card-${inv.id}`}>
+                <InvestmentCard
+                  investment={inv}
+                  onEdit={() => setEditingInvestment(inv)}
+                  onDelete={() => handleDelete(inv.id)}
+                  onLogValue={() => setLoggingInvestment(inv)}
+                  onHistory={() => setHistoryInvestment(inv)}
+                />
+              </div>
             ))}
           </div>
         )}

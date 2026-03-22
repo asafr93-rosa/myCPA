@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useFinanceStore } from '../store/useFinanceStore'
 import type { BankAccount } from '../store/useFinanceStore'
 import { AccountCard } from '../components/accounts/AccountCard'
@@ -6,7 +7,26 @@ import { AccountDrawer } from '../components/accounts/AccountDrawer'
 import { Button } from '../components/ui/Button'
 import toast from 'react-hot-toast'
 
+function useScrollToCard() {
+  const location = useLocation()
+  useEffect(() => {
+    const id = (location.state as { scrollTo?: string } | null)?.scrollTo
+    if (!id) return
+    window.history.replaceState({}, '', location.pathname)
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`card-${id}`)
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.style.transition = 'box-shadow 0.3s'
+      el.style.boxShadow = '0 0 0 2px rgba(0,212,170,0.6)'
+      setTimeout(() => { el.style.boxShadow = '' }, 1800)
+    }, 100)
+    return () => clearTimeout(timer)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+}
+
 export function BankAccounts() {
+  useScrollToCard()
   const accounts = useFinanceStore((s) => s.accounts)
   const addAccount = useFinanceStore((s) => s.addAccount)
   const updateAccount = useFinanceStore((s) => s.updateAccount)
@@ -67,12 +87,13 @@ export function BankAccounts() {
         ) : (
           <div className="space-y-3">
             {accounts.map((account) => (
-              <AccountCard
-                key={account.id}
-                account={account}
-                onEdit={() => setEditingAccount(account)}
-                onDelete={() => handleDelete(account.id)}
-              />
+              <div key={account.id} id={`card-${account.id}`}>
+                <AccountCard
+                  account={account}
+                  onEdit={() => setEditingAccount(account)}
+                  onDelete={() => handleDelete(account.id)}
+                />
+              </div>
             ))}
           </div>
         )}

@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useFinanceStore } from '../store/useFinanceStore'
 import type { Asset } from '../store/useFinanceStore'
 import { AssetCard } from '../components/assets/AssetCard'
@@ -7,7 +8,26 @@ import { Button } from '../components/ui/Button'
 import { formatCurrency, convertAmount } from '../lib/formatters'
 import toast from 'react-hot-toast'
 
+function useScrollToCard() {
+  const location = useLocation()
+  useEffect(() => {
+    const id = (location.state as { scrollTo?: string } | null)?.scrollTo
+    if (!id) return
+    window.history.replaceState({}, '', location.pathname)
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`card-${id}`)
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.style.transition = 'box-shadow 0.3s'
+      el.style.boxShadow = '0 0 0 2px rgba(0,212,170,0.6)'
+      setTimeout(() => { el.style.boxShadow = '' }, 1800)
+    }, 100)
+    return () => clearTimeout(timer)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+}
+
 export function Assets() {
+  useScrollToCard()
   const assets = useFinanceStore((s) => s.assets)
   const rates = useFinanceStore((s) => s.settings.exchangeRates)
   const addAsset = useFinanceStore((s) => s.addAsset)
@@ -88,12 +108,13 @@ export function Assets() {
         ) : (
           <div className="space-y-3">
             {assets.map((asset) => (
-              <AssetCard
-                key={asset.id}
-                asset={asset}
-                onEdit={() => setEditingAsset(asset)}
-                onDelete={() => handleDelete(asset.id)}
-              />
+              <div key={asset.id} id={`card-${asset.id}`}>
+                <AssetCard
+                  asset={asset}
+                  onEdit={() => setEditingAsset(asset)}
+                  onDelete={() => handleDelete(asset.id)}
+                />
+              </div>
             ))}
           </div>
         )}

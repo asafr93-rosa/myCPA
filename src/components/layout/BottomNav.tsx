@@ -66,7 +66,7 @@ export function BottomNav() {
           to={item.path}
           end={item.path === '/'}
           className={({ isActive }) =>
-            `flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors ${
+            `flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${
               isActive ? 'text-[#00D4AA]' : 'text-[#484F58]'
             }`
           }
