@@ -59,15 +59,15 @@ const NAV_ITEMS = [
 
 export function BottomNav() {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0D1117]/95 backdrop-blur-md border-t border-white/8 shadow-[0_-2px_12px_rgba(0,0,0,0.06)] flex">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#F3F4F6] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] flex pb-safe">
       {NAV_ITEMS.map((item) => (
         <NavLink
           key={item.path}
           to={item.path}
           end={item.path === '/'}
           className={({ isActive }) =>
-            `flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${
-              isActive ? 'text-[#00D4AA]' : 'text-[#484F58]'
+            `flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-semibold transition-colors ${
+              isActive ? 'text-[#00C896]' : 'text-[#6B7280]'
             }`
           }
         >

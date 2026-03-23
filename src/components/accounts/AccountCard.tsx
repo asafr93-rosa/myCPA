@@ -83,19 +83,32 @@ export function AccountCard({ account, onEdit, onDelete }: AccountCardProps) {
         </div>
 
         {/* Deposits */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-[#7D8590]">Deposits</span>
-          <div className="text-right">
-            <span className="font-mono text-sm text-[#3B82F6]">
-              {formatCurrency(depositsILS, 'ILS')}
-            </span>
-            {account.depositsCurrency !== 'ILS' && account.deposits > 0 && (
-              <p className="text-[10px] text-[#484F58] font-mono">
-                {formatCurrency(account.deposits, account.depositsCurrency)} native
-              </p>
-            )}
+        {account.deposits > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs text-[#6B7280]">Deposits</span>
+              <div className="text-right">
+                <span className="font-mono text-sm font-semibold text-[#3B82F6]">
+                  {formatCurrency(depositsILS, 'ILS')}
+                </span>
+                {account.depositsCurrency !== 'ILS' && (
+                  <p className="text-[10px] text-[#9CA3AF] font-mono">
+                    {formatCurrency(account.deposits, account.depositsCurrency)} native
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="progress-track">
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${totalILS > 0 && depositsILS > 0 ? Math.min(100, Math.round((depositsILS / (Math.abs(totalILS) + depositsILS)) * 100)) : 100}%`,
+                  background: '#3B82F6',
+                }}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>

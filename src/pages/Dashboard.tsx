@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { useFinanceStore, computeTotalBalance } from '../store/useFinanceStore'
 import { AnimatedCounter } from '../components/ui/AnimatedCounter'
 import { formatCurrency, convertAmount } from '../lib/formatters'
@@ -6,17 +6,18 @@ import { computeRecommendations } from '../lib/recommendations'
 import { portfolioWeightedReturn, totalReturnPct } from '../lib/investmentMetrics'
 import { Link, useNavigate } from 'react-router-dom'
 
-function KPICard({ label, value, currency, isNegative = false }: {
-  label: string; value: number; currency: string; isNegative?: boolean
+function KPICard({ label, value, currency, isNegative = false, hero = false, children }: {
+  label: string; value: number; currency: string; isNegative?: boolean; hero?: boolean; children?: ReactNode
 }) {
   return (
-    <div className="glass-card px-4 py-3 flex flex-col gap-0.5">
-      <span className="text-[10px] font-medium text-[#484F58] uppercase tracking-widest">{label}</span>
+    <div className={`glass-card flex flex-col ${hero ? 'px-5 py-4 gap-1 col-span-2' : 'px-4 py-3 gap-0.5'}`}>
+      <span className="section-label">{label}</span>
       <AnimatedCounter
         value={value}
         currency={currency}
-        className={`text-lg font-semibold font-mono ${isNegative ? 'text-[#F87171]' : 'text-[#E6EDF3]'}`}
+        className={`font-mono font-bold ${hero ? 'text-3xl' : 'text-xl'} ${isNegative ? 'text-[#F43F5E]' : 'text-[#111827]'}`}
       />
+      {children}
     </div>
   )
 }
@@ -24,35 +25,31 @@ function KPICard({ label, value, currency, isNegative = false }: {
 function SuggestionPill({ message, amount, color }: { message: string; amount: number; color: string }) {
   const parts = message.split(/\*\*(.+?)\*\*/g)
   return (
-    <div
-      className="glass-card px-4 py-3 flex items-start gap-3 animate-slide-up"
-      style={{ borderLeft: `2px solid ${color}60` }}
-    >
-      <div
-        className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
-        style={{ background: color, boxShadow: `0 0 6px ${color}` }}
-      />
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-[#7D8590] leading-relaxed">
-          {parts.map((part, i) =>
-            i % 2 === 1
-              ? <strong key={i} className="text-[#E6EDF3] font-semibold">{part}</strong>
-              : part
-          )}
-        </p>
+    <div className="glass-card flex items-stretch gap-0 overflow-hidden animate-fade-in">
+      <div className="w-1 shrink-0 rounded-l-2xl" style={{ background: color }} />
+      <div className="flex-1 min-w-0 flex items-start gap-3 px-4 py-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs text-[#6B7280] leading-relaxed">
+            {parts.map((part, i) =>
+              i % 2 === 1
+                ? <strong key={i} className="text-[#111827] font-semibold">{part}</strong>
+                : part
+            )}
+          </p>
+        </div>
+        <span className="font-mono text-xs font-bold shrink-0" style={{ color }}>
+          {formatCurrency(amount, 'ILS')}
+        </span>
       </div>
-      <span className="font-mono text-xs font-semibold shrink-0" style={{ color }}>
-        {formatCurrency(amount, 'ILS')}
-      </span>
     </div>
   )
 }
 
 const SUGGESTION_COLORS = {
-  transfer: '#00D4AA',
-  savings_withdrawal: '#58A6FF',
-  deposit_withdrawal: '#C084FC',
-  liquidation: '#3B82F6',
+  transfer: '#00C896',
+  savings_withdrawal: '#3B82F6',
+  deposit_withdrawal: '#7C3AED',
+  liquidation: '#F43F5E',
 }
 
 export function Dashboard() {
@@ -124,20 +121,20 @@ export function Dashboard() {
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
       <div className="shrink-0 px-5 pt-5 pb-3">
-        <h1 className="text-base font-semibold text-[#E6EDF3] leading-tight">Dashboard</h1>
-        <p className="text-xs text-[#484F58]">All amounts in {displayCurrency}</p>
+        <h1 className="text-lg font-bold text-[#111827] leading-tight">Overview</h1>
+        <p className="text-xs text-[#9CA3AF]">All amounts in {displayCurrency}</p>
       </div>
 
       {/* KPI strip */}
-      <div className="shrink-0 px-5 pb-3 grid grid-cols-2 gap-2">
-        <KPICard label="Net Worth" value={totals.netWorth} currency={displayCurrency} isNegative={totals.netWorth < 0} />
+      <div className="shrink-0 px-5 pb-3 grid grid-cols-2 gap-2.5">
+        <KPICard label="Net Worth" value={totals.netWorth} currency={displayCurrency} isNegative={totals.netWorth < 0} hero />
         <KPICard label="Liquid" value={totals.liquid} currency={displayCurrency} isNegative={totals.liquid < 0} />
         <KPICard label="Deposits" value={totals.deposits} currency={displayCurrency} />
         <div className="glass-card px-4 py-3 flex flex-col gap-0.5">
-          <span className="text-[10px] font-medium text-[#484F58] uppercase tracking-widest">Investments</span>
-          <AnimatedCounter value={totals.inv} currency={displayCurrency} className="text-lg font-semibold font-mono text-[#E6EDF3]" />
+          <span className="section-label">Investments</span>
+          <AnimatedCounter value={totals.inv} currency={displayCurrency} className="text-xl font-bold font-mono text-[#111827]" />
           {portfolioReturn !== null && (
-            <span className={`text-[10px] font-mono font-semibold ${portfolioReturn >= 0 ? 'text-[#00D4AA]' : 'text-[#F87171]'}`}>
+            <span className={`text-[10px] font-mono font-semibold ${portfolioReturn >= 0 ? 'text-[#00C896]' : 'text-[#F43F5E]'}`}>
               {portfolioReturn >= 0 ? '+' : ''}{portfolioReturn.toFixed(2)}% all time
             </span>
           )}
@@ -148,17 +145,17 @@ export function Dashboard() {
       {/* Suggestions — right below KPI cards (mobile only; desktop shows in right panel) */}
       <div className="lg:hidden shrink-0 px-5 pb-3">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#00D4AA] animate-pulse" />
-          <p className="text-[10px] font-semibold text-[#484F58] uppercase tracking-widest">Suggestions</p>
+          <div className="w-1.5 h-1.5 rounded-full bg-[#00C896] animate-pulse" />
+          <p className="section-label">Suggestions</p>
         </div>
         {suggestions.length === 0 ? (
           <div className="glass-card px-4 py-3 flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-[#00D4AA]/10 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 rounded-full bg-[#00C896]/10 flex items-center justify-center shrink-0">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2.5 6l2.5 2.5 5-5" stroke="#00D4AA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2.5 6l2.5 2.5 5-5" stroke="#00C896" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <p className="text-xs text-[#7D8590]">All accounts are healthy</p>
+            <p className="text-xs text-[#6B7280]">All accounts are healthy</p>
           </div>
         ) : (
           <div className="space-y-2 max-h-[28dvh] overflow-y-auto overscroll-contain">
@@ -194,7 +191,7 @@ export function Dashboard() {
         {/* Bank accounts */}
         {accounts.length > 0 && (
           <div>
-            <p className="text-[10px] font-semibold text-[#484F58] uppercase tracking-widest mb-2">Bank Accounts</p>
+            <p className="section-label mb-2">Bank Accounts</p>
             <div className="space-y-2">
               {accounts.map((acc) => {
                 const total = computeTotalBalance(acc, rates)
@@ -238,7 +235,7 @@ export function Dashboard() {
         {/* Investments */}
         {investments.length > 0 && (
           <div>
-            <p className="text-[10px] font-semibold text-[#484F58] uppercase tracking-widest mb-2">Investments</p>
+            <p className="section-label mb-2">Investments</p>
             <div className="space-y-2">
               {investments.map((inv) => {
                 const invILS = convertAmount(inv.balance, inv.currency, 'ILS', rates)
@@ -289,7 +286,7 @@ export function Dashboard() {
         {/* Assets */}
         {assets.length > 0 && (
           <div>
-            <p className="text-[10px] font-semibold text-[#484F58] uppercase tracking-widest mb-2">Assets</p>
+            <p className="section-label mb-2">Assets</p>
             <div className="space-y-2">
               {assets.map((asset) => {
                 const assetILS = convertAmount(asset.value, asset.currency, 'ILS', rates)
