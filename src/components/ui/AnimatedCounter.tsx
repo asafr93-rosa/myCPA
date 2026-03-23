@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { formatCurrency } from '../../lib/formatters'
+import { formatCurrency, formatCompact } from '../../lib/formatters'
 
 interface AnimatedCounterProps {
   value: number
   currency?: string
   duration?: number
   className?: string
+  compact?: boolean
 }
 
-export function AnimatedCounter({ value, currency = 'USD', duration = 800, className = '' }: AnimatedCounterProps) {
+export function AnimatedCounter({ value, currency = 'USD', duration = 800, className = '', compact = false }: AnimatedCounterProps) {
   const [display, setDisplay] = useState(0)
   const prevValue = useRef(0)
   const rafRef = useRef<number | null>(null)
@@ -42,7 +43,7 @@ export function AnimatedCounter({ value, currency = 'USD', duration = 800, class
 
   return (
     <span className={`font-mono ${className}`}>
-      {formatCurrency(display, currency)}
+      {compact ? formatCompact(display, currency) : formatCurrency(display, currency)}
     </span>
   )
 }

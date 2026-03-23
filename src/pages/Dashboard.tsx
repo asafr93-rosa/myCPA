@@ -6,16 +6,17 @@ import { computeRecommendations } from '../lib/recommendations'
 import { portfolioWeightedReturn, totalReturnPct } from '../lib/investmentMetrics'
 import { Link, useNavigate } from 'react-router-dom'
 
-function KPICard({ label, value, currency, isNegative = false, hero = false, children }: {
-  label: string; value: number; currency: string; isNegative?: boolean; hero?: boolean; children?: ReactNode
+function KPICard({ label, value, currency, isNegative = false, hero = false, compact = false, children }: {
+  label: string; value: number; currency: string; isNegative?: boolean; hero?: boolean; compact?: boolean; children?: ReactNode
 }) {
   return (
-    <div className={`glass-card flex flex-col ${hero ? 'px-5 py-4 gap-1 col-span-2' : 'px-4 py-3 gap-0.5'}`}>
+    <div className={`glass-card flex flex-col min-w-0 overflow-hidden ${hero ? 'px-5 py-4 gap-1' : 'px-4 py-3 gap-0.5'}`}>
       <span className="section-label">{label}</span>
       <AnimatedCounter
         value={value}
         currency={currency}
-        className={`font-mono font-bold ${hero ? 'text-3xl' : 'text-xl'} ${isNegative ? 'text-[#F43F5E]' : 'text-[#111827]'}`}
+        compact={compact}
+        className={`font-mono font-bold truncate ${hero ? 'text-2xl' : 'text-base'} ${isNegative ? 'text-[#F43F5E]' : 'text-[#111827]'}`}
       />
       {children}
     </div>
@@ -119,60 +120,62 @@ export function Dashboard() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 px-5 pt-5 pb-3">
-        <h1 className="text-lg font-bold text-[#111827] leading-tight">Overview</h1>
-        <p className="text-xs text-[#9CA3AF]">All amounts in {displayCurrency}</p>
-      </div>
+      {/* Single scrollable area — everything scrolls together */}
+      <div className="flex-1 overflow-y-auto overscroll-contain px-5 pt-5 pb-24 md:pb-6 space-y-4">
 
-      {/* KPI strip */}
-      <div className="shrink-0 px-5 pb-3 grid grid-cols-2 gap-2.5">
+        {/* Header */}
+        <div>
+          <h1 className="text-lg font-bold text-[#111827] leading-tight">Overview</h1>
+          <p className="text-xs text-[#9CA3AF]">All amounts in {displayCurrency}</p>
+        </div>
+
+        {/* Net Worth hero */}
         <KPICard label="Net Worth" value={totals.netWorth} currency={displayCurrency} isNegative={totals.netWorth < 0} hero />
-        <KPICard label="Liquid" value={totals.liquid} currency={displayCurrency} isNegative={totals.liquid < 0} />
-        <KPICard label="Deposits" value={totals.deposits} currency={displayCurrency} />
-        <div className="glass-card px-4 py-3 flex flex-col gap-0.5">
-          <span className="section-label">Investments</span>
-          <AnimatedCounter value={totals.inv} currency={displayCurrency} className="text-xl font-bold font-mono text-[#111827]" />
-          {portfolioReturn !== null && (
-            <span className={`text-[10px] font-mono font-semibold ${portfolioReturn >= 0 ? 'text-[#00C896]' : 'text-[#F43F5E]'}`}>
-              {portfolioReturn >= 0 ? '+' : ''}{portfolioReturn.toFixed(2)}% all time
-            </span>
+
+        {/* KPI grid — compact numbers fit half-width cards */}
+        <div className="grid grid-cols-2 gap-2.5">
+          <KPICard label="Liquid" value={totals.liquid} currency={displayCurrency} isNegative={totals.liquid < 0} compact />
+          <KPICard label="Deposits" value={totals.deposits} currency={displayCurrency} compact />
+          <div className="glass-card px-4 py-3 flex flex-col gap-0.5 min-w-0 overflow-hidden">
+            <span className="section-label">Investments</span>
+            <AnimatedCounter value={totals.inv} currency={displayCurrency} className="text-base font-bold font-mono text-[#111827] truncate" compact />
+            {portfolioReturn !== null && (
+              <span className={`text-[10px] font-mono font-semibold ${portfolioReturn >= 0 ? 'text-[#00C896]' : 'text-[#F43F5E]'}`}>
+                {portfolioReturn >= 0 ? '+' : ''}{portfolioReturn.toFixed(1)}%
+              </span>
+            )}
+          </div>
+          <KPICard label="Assets" value={totals.assets} currency={displayCurrency} compact />
+        </div>
+
+        {/* Suggestions — mobile only; desktop shows in right panel */}
+        <div className="lg:hidden">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#00C896] animate-pulse" />
+            <p className="section-label">Suggestions</p>
+          </div>
+          {suggestions.length === 0 ? (
+            <div className="glass-card px-4 py-3 flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-[#00C896]/10 flex items-center justify-center shrink-0">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2.5 6l2.5 2.5 5-5" stroke="#00C896" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <p className="text-xs text-[#6B7280]">All accounts are healthy</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {suggestions.map((s) => (
+                <SuggestionPill
+                  key={s.id}
+                  message={s.message}
+                  amount={s.amountILS}
+                  color={SUGGESTION_COLORS[s.type]}
+                />
+              ))}
+            </div>
           )}
         </div>
-        <KPICard label="Assets" value={totals.assets} currency={displayCurrency} />
-      </div>
-
-      {/* Suggestions — right below KPI cards (mobile only; desktop shows in right panel) */}
-      <div className="lg:hidden shrink-0 px-5 pb-3">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#00C896] animate-pulse" />
-          <p className="section-label">Suggestions</p>
-        </div>
-        {suggestions.length === 0 ? (
-          <div className="glass-card px-4 py-3 flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-[#00C896]/10 flex items-center justify-center shrink-0">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2.5 6l2.5 2.5 5-5" stroke="#00C896" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <p className="text-xs text-[#6B7280]">All accounts are healthy</p>
-          </div>
-        ) : (
-          <div className="space-y-2 max-h-[28dvh] overflow-y-auto overscroll-contain">
-            {suggestions.map((s) => (
-              <SuggestionPill
-                key={s.id}
-                message={s.message}
-                amount={s.amountILS}
-                color={SUGGESTION_COLORS[s.type]}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Scrollable body */}
-      <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-24 md:pb-6 space-y-5">
 
         {/* Negative account warnings */}
         {accounts.filter((a) => computeTotalBalance(a, rates) < 0).map((acc) => (
