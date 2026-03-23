@@ -13,25 +13,25 @@ function CategoryIcon({ category }: { category: Asset['category'] }) {
   if (category === 'real_estate') {
     return (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M1 14V7l7-5 7 5v7H1z" stroke="#F59E0B" strokeWidth="1.4" strokeLinejoin="round"/>
-        <path d="M6 14v-4h4v4" stroke="#F59E0B" strokeWidth="1.4" strokeLinejoin="round"/>
+        <path d="M1 14V7l7-5 7 5v7H1z" stroke="#3B82F6" strokeWidth="1.4" strokeLinejoin="round"/>
+        <path d="M6 14v-4h4v4" stroke="#3B82F6" strokeWidth="1.4" strokeLinejoin="round"/>
       </svg>
     )
   }
   if (category === 'vehicle') {
     return (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M2 9l1.5-4h9L14 9v3H2V9z" stroke="#F59E0B" strokeWidth="1.4" strokeLinejoin="round"/>
-        <circle cx="4.5" cy="12.5" r="1.5" stroke="#F59E0B" strokeWidth="1.2"/>
-        <circle cx="11.5" cy="12.5" r="1.5" stroke="#F59E0B" strokeWidth="1.2"/>
-        <path d="M2 9h12" stroke="#F59E0B" strokeWidth="1.2"/>
+        <path d="M2 9l1.5-4h9L14 9v3H2V9z" stroke="#3B82F6" strokeWidth="1.4" strokeLinejoin="round"/>
+        <circle cx="4.5" cy="12.5" r="1.5" stroke="#3B82F6" strokeWidth="1.2"/>
+        <circle cx="11.5" cy="12.5" r="1.5" stroke="#3B82F6" strokeWidth="1.2"/>
+        <path d="M2 9h12" stroke="#3B82F6" strokeWidth="1.2"/>
       </svg>
     )
   }
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect x="2" y="4" width="12" height="9" rx="1.5" stroke="#F59E0B" strokeWidth="1.4"/>
-      <path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1" stroke="#F59E0B" strokeWidth="1.4"/>
+      <rect x="2" y="4" width="12" height="9" rx="1.5" stroke="#3B82F6" strokeWidth="1.4"/>
+      <path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1" stroke="#3B82F6" strokeWidth="1.4"/>
     </svg>
   )
 }
@@ -53,7 +53,7 @@ export function AssetCard({ asset, onEdit, onDelete }: AssetCardProps) {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center shrink-0">
             <CategoryIcon category={asset.category} />
           </div>
           <div>

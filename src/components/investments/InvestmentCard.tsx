@@ -22,8 +22,10 @@ interface InvestmentCardProps {
 export function InvestmentCard({ investment, onEdit, onDelete, onLogValue, onHistory }: InvestmentCardProps) {
   const [expanded, setExpanded] = useState(false)
   const rates = useFinanceStore((s) => s.settings.exchangeRates)
+  const theme = useFinanceStore((s) => s.settings.theme)
   const snapshots = useFinanceStore((s) => s.snapshots)
   const trackingSettings = useFinanceStore((s) => s.trackingSettings)
+  const isDark = theme === 'dark'
 
   const balanceILS = convertAmount(investment.balance, investment.currency, 'ILS', rates)
   const CHAR_LIMIT = 90
@@ -69,7 +71,7 @@ export function InvestmentCard({ investment, onEdit, onDelete, onLogValue, onHis
               <path d="M11 2.5v2M10 3.5h2" stroke="#0D1117" strokeWidth="0.9" strokeLinecap="round"/>
             </svg>
             {overdue && (
-              <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
+              <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
             )}
           </button>
           <button onClick={onEdit} className="text-[#7D8590] hover:text-[#E6EDF3] p-1.5 rounded-lg hover:bg-white/5 transition-colors">
@@ -151,19 +153,19 @@ export function InvestmentCard({ investment, onEdit, onDelete, onLogValue, onHis
           <div className="h-20">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#484F58' }} tickLine={false} axisLine={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 8, fill: isDark ? '#484F58' : '#94A3B8' }} tickLine={false} axisLine={false} />
                 <YAxis
                   tickFormatter={(v) => formatCompact(v, 'ILS')}
-                  tick={{ fontSize: 8, fill: '#484F58' }}
+                  tick={{ fontSize: 8, fill: isDark ? '#484F58' : '#94A3B8' }}
                   tickLine={false}
                   axisLine={false}
                   width={44}
                 />
                 <Tooltip
-                  contentStyle={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', fontSize: '11px' }}
-                  labelStyle={{ color: '#7D8590' }}
+                  contentStyle={{ background: isDark ? '#161B22' : '#FFFFFF', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)', borderRadius: '8px', fontSize: '11px', boxShadow: isDark ? 'none' : '0 4px 12px rgba(0,0,0,0.08)' }}
+                  labelStyle={{ color: isDark ? '#7D8590' : '#64748B' }}
                   formatter={(v) => [formatCurrency(Number(v), 'ILS'), 'Value']}
-                  cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+                  cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }}
                 />
                 <Bar dataKey="valueILS" fill="#00D4AA" radius={[3, 3, 0, 0]} />
               </BarChart>

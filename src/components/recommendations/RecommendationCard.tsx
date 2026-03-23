@@ -9,7 +9,7 @@ const TYPE_CONFIG: Record<Suggestion['type'], { color: string; glyph: string }> 
   transfer:            { color: '#00D4AA', glyph: '→' },
   savings_withdrawal:  { color: '#58A6FF', glyph: '↓' },
   deposit_withdrawal:  { color: '#C084FC', glyph: '↓' },
-  liquidation:         { color: '#F59E0B', glyph: '⬡' },
+  liquidation:         { color: '#3B82F6', glyph: '⬡' },
 }
 
 function PlainMessage({ text }: { text: string }) {

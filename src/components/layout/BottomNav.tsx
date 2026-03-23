@@ -59,7 +59,7 @@ const NAV_ITEMS = [
 
 export function BottomNav() {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0D1117]/95 backdrop-blur-md border-t border-white/8 flex">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0D1117]/95 backdrop-blur-md border-t border-white/8 shadow-[0_-2px_12px_rgba(0,0,0,0.06)] flex">
       {NAV_ITEMS.map((item) => (
         <NavLink
           key={item.path}

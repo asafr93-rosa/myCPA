@@ -86,7 +86,7 @@ export function AccountCard({ account, onEdit, onDelete }: AccountCardProps) {
         <div className="flex items-center justify-between">
           <span className="text-xs text-[#7D8590]">Deposits</span>
           <div className="text-right">
-            <span className="font-mono text-sm text-[#F59E0B]">
+            <span className="font-mono text-sm text-[#3B82F6]">
               {formatCurrency(depositsILS, 'ILS')}
             </span>
             {account.depositsCurrency !== 'ILS' && account.deposits > 0 && (

@@ -79,9 +79,9 @@ export function Assets() {
       {/* Total bar */}
       {assets.length > 0 && (
         <div className="shrink-0 mx-5 mb-3 glass-card px-4 py-3 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center shrink-0">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M1 13V6l6-4.5L13 6v7H1z" stroke="#F59E0B" strokeWidth="1.3" strokeLinejoin="round"/>
+              <path d="M1 13V6l6-4.5L13 6v7H1z" stroke="#3B82F6" strokeWidth="1.3" strokeLinejoin="round"/>
             </svg>
           </div>
           <div>

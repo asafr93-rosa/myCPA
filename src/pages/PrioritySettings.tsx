@@ -270,8 +270,8 @@ const TYPE_ICONS: Record<PriorityItem['type'], React.ReactNode> = {
   ),
   bank_deposits: (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <rect x="1" y="3" width="12" height="8" rx="1.5" stroke="#F59E0B" strokeWidth="1.2"/>
-      <path d="M4 7h6M7 5v4" stroke="#F59E0B" strokeWidth="1.2" strokeLinecap="round"/>
+      <rect x="1" y="3" width="12" height="8" rx="1.5" stroke="#3B82F6" strokeWidth="1.2"/>
+      <path d="M4 7h6M7 5v4" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round"/>
     </svg>
   ),
   investment: (
@@ -281,7 +281,7 @@ const TYPE_ICONS: Record<PriorityItem['type'], React.ReactNode> = {
   ),
 }
 const TYPE_COLORS: Record<PriorityItem['type'], string> = {
-  bank_balance: '#00D4AA', bank_deposits: '#F59E0B', investment: '#C084FC',
+  bank_balance: '#00D4AA', bank_deposits: '#3B82F6', investment: '#C084FC',
 }
 const TYPE_LABELS: Record<PriorityItem['type'], string> = {
   bank_balance: 'Balance', bank_deposits: 'Deposits', investment: 'Investment',

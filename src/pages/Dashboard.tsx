@@ -52,7 +52,7 @@ const SUGGESTION_COLORS = {
   transfer: '#00D4AA',
   savings_withdrawal: '#58A6FF',
   deposit_withdrawal: '#C084FC',
-  liquidation: '#F59E0B',
+  liquidation: '#3B82F6',
 }
 
 export function Dashboard() {
@@ -299,9 +299,9 @@ export function Dashboard() {
                     onClick={() => navigate('/assets', { state: { scrollTo: asset.id } })}
                     className="glass-card px-4 py-3 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center shrink-0">
                       <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-                        <path d="M1 13V7l6-4.5L13 7v6H1z" stroke="#F59E0B" strokeWidth="1.3" strokeLinejoin="round"/>
+                        <path d="M1 13V7l6-4.5L13 7v6H1z" stroke="#3B82F6" strokeWidth="1.3" strokeLinejoin="round"/>
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -309,7 +309,7 @@ export function Dashboard() {
                       <p className="text-[10px] text-[#484F58] capitalize">{asset.category.replace('_', ' ')}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-mono text-sm font-semibold text-[#F59E0B]">
+                      <p className="font-mono text-sm font-semibold text-[#3B82F6]">
                         {formatCurrency(assetILS, 'ILS')}
                       </p>
                       {asset.currency !== 'ILS' && (

@@ -29,20 +29,20 @@ function SampleDataBanner() {
   if (!sampleDataLoaded || sampleDataDismissed) return null
 
   return (
-    <div className="flex items-center justify-between px-4 py-2.5 bg-[#F59E0B]/10 border-b border-[#F59E0B]/20 shrink-0">
+    <div className="flex items-center justify-between px-4 py-2.5 bg-[#3B82F6]/10 border-b border-[#3B82F6]/20 shrink-0">
       <div className="flex items-center gap-2">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
-          <circle cx="7" cy="7" r="6.5" stroke="#F59E0B" strokeWidth="1.2"/>
-          <path d="M7 6v3.5" stroke="#F59E0B" strokeWidth="1.2" strokeLinecap="round"/>
-          <circle cx="7" cy="4.5" r="0.7" fill="#F59E0B"/>
+          <circle cx="7" cy="7" r="6.5" stroke="#3B82F6" strokeWidth="1.2"/>
+          <path d="M7 6v3.5" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round"/>
+          <circle cx="7" cy="4.5" r="0.7" fill="#3B82F6"/>
         </svg>
-        <span className="text-xs text-[#F59E0B]">
+        <span className="text-xs text-[#3B82F6]">
           Sample data loaded — customize by editing or deleting these accounts
         </span>
       </div>
       <button
         onClick={dismissSampleBanner}
-        className="text-[#F59E0B]/60 hover:text-[#F59E0B] transition-colors ml-4 shrink-0"
+        className="text-[#3B82F6]/60 hover:text-[#3B82F6] transition-colors ml-4 shrink-0"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M10.5 3.5l-7 7M3.5 3.5l7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>

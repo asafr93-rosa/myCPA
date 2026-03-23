@@ -7,7 +7,7 @@ import { formatCurrency } from '../lib/formatters'
 
 const ACTION_COLORS: Record<AIAction['type'], string> = {
   transfer: '#00D4AA',
-  withdraw: '#F59E0B',
+  withdraw: '#3B82F6',
   liquidate: '#F87171',
   deposit: '#00D4AA',
   other: '#58A6FF',
@@ -94,11 +94,11 @@ export function AIAdvisor() {
   if (!apiKey) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center px-6 pb-20 md:pb-0">
-        <div className="w-12 h-12 rounded-2xl bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center mb-3">
+        <div className="w-12 h-12 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center mb-3">
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M11 2L20 18H2L11 2z" stroke="#F59E0B" strokeWidth="1.5" strokeLinejoin="round"/>
-            <path d="M11 9v4" stroke="#F59E0B" strokeWidth="1.4" strokeLinecap="round"/>
-            <circle cx="11" cy="15.5" r="0.8" fill="#F59E0B"/>
+            <path d="M11 2L20 18H2L11 2z" stroke="#3B82F6" strokeWidth="1.5" strokeLinejoin="round"/>
+            <path d="M11 9v4" stroke="#3B82F6" strokeWidth="1.4" strokeLinecap="round"/>
+            <circle cx="11" cy="15.5" r="0.8" fill="#3B82F6"/>
           </svg>
         </div>
         <h2 className="text-sm font-semibold text-[#E6EDF3] mb-1.5">API Key Required</h2>
@@ -180,11 +180,11 @@ export function AIAdvisor() {
 
             {result.warnings?.length > 0 && (
               <div className="glass-card px-4 py-3 space-y-2">
-                <p className="text-[10px] font-semibold text-[#F59E0B] uppercase tracking-widest">Warnings</p>
+                <p className="text-[10px] font-semibold text-[#3B82F6] uppercase tracking-widest">Warnings</p>
                 <ul className="space-y-1.5">
                   {result.warnings.map((w, i) => (
                     <li key={i} className="flex items-start gap-2 text-xs text-[#7D8590]">
-                      <span className="text-[#F59E0B] mt-0.5">•</span>{w}
+                      <span className="text-[#3B82F6] mt-0.5">•</span>{w}
                     </li>
                   ))}
                 </ul>

@@ -67,7 +67,7 @@ export function AssetModal({ open, onClose, onSubmit, initial }: AssetModalProps
                 onClick={() => setCategory(c.value)}
                 className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${
                   category === c.value
-                    ? 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30'
+                    ? 'bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30'
                     : 'bg-[#161B22] text-[#7D8590] border border-white/8 hover:border-white/20'
                 }`}
               >

@@ -123,7 +123,7 @@ export function computeTotalBalance(
   return bal + inc - exp
 }
 
-const ACCOUNT_COLORS = ['#00D4AA', '#58A6FF', '#F59E0B', '#C084FC', '#F87171', '#34D399']
+const ACCOUNT_COLORS = ['#00D4AA', '#58A6FF', '#3B82F6', '#C084FC', '#F87171', '#34D399']
 
 const DEFAULT_SETTINGS: AppSettings = {
   displayCurrency: 'ILS',
@@ -563,7 +563,7 @@ export const useFinanceStore = create<FinanceState>()(
         if (state) {
           if (!state.settings) state.settings = DEFAULT_SETTINGS
           // Migrate missing fields added in later versions
-          if (!state.settings.theme) state.settings.theme = 'dark'
+          state.settings.theme = 'light' // visual overhaul: force light theme for all users
           if (!state.settings.userProfile) state.settings.userProfile = { name: '', age: '', avatarDataUrl: '' }
           if (!state.settings.exchangeRates.GBP_ILS) state.settings.exchangeRates.GBP_ILS = 4.60
           if (!(['ILS','USD','EUR','GBP'] as string[]).includes(state.settings.displayCurrency)) {
