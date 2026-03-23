@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
+import { LockScreen } from './components/auth/LockScreen'
 import { Toaster } from 'react-hot-toast'
 import { Sidebar } from './components/layout/Sidebar'
 import { BottomNav } from './components/layout/BottomNav'
@@ -70,6 +71,24 @@ function Layout() {
 }
 
 export default function App() {
+  const [unlocked, setUnlocked] = useState(
+    () => sessionStorage.getItem('floww-unlocked') === '1'
+  )
+
+  function handleUnlock() {
+    sessionStorage.setItem('floww-unlocked', '1')
+    setUnlocked(true)
+  }
+
+  if (!unlocked) {
+    return (
+      <>
+        <ThemeApplier />
+        <LockScreen onUnlock={handleUnlock} />
+      </>
+    )
+  }
+
   return (
     <BrowserRouter>
       <ThemeApplier />
