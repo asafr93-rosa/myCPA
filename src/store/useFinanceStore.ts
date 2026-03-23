@@ -128,7 +128,7 @@ const ACCOUNT_COLORS = ['#00D4AA', '#58A6FF', '#3B82F6', '#C084FC', '#F87171', '
 const DEFAULT_SETTINGS: AppSettings = {
   displayCurrency: 'ILS',
   exchangeRates: { USD_ILS: 3.65, EUR_ILS: 3.95, GBP_ILS: 4.60 },
-  theme: 'dark',
+  theme: 'light',
   userProfile: { name: '', age: '', avatarDataUrl: '' },
 }
 

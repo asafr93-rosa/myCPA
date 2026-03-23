@@ -101,8 +101,8 @@ body {
 
 /* ── Light mode ────────────────────────────────────────────────────────────── */
 
-[data-theme="light"] html,
-[data-theme="light"] body {
+html[data-theme="light"],
+html[data-theme="light"] body {
   background-color: #F5F7FA;
   color: #0F172A;
 }
