@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   hasCredential,
   isBiometricSupported,
@@ -15,6 +15,12 @@ export function LockScreen({ onUnlock }: Props) {
   const registered = hasCredential()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (registered) {
+      handleBiometric()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleBiometric() {
     setError(null)
