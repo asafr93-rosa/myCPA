@@ -1,4 +1,5 @@
 const CRED_KEY = 'floww-faceid-cred'
+const ORIGIN_KEY = 'floww-faceid-origin'
 
 function randomChallenge(): ArrayBuffer {
   return crypto.getRandomValues(new Uint8Array(32)).buffer as ArrayBuffer
@@ -16,11 +17,13 @@ function bufferToBase64(buf: ArrayBuffer): string {
 }
 
 export function hasCredential(): boolean {
-  return !!localStorage.getItem(CRED_KEY)
+  if (!localStorage.getItem(CRED_KEY)) return false
+  return localStorage.getItem(ORIGIN_KEY) === window.location.hostname
 }
 
 export function clearCredential(): void {
   localStorage.removeItem(CRED_KEY)
+  localStorage.removeItem(ORIGIN_KEY)
 }
 
 export function isBiometricSupported(): boolean {
@@ -55,6 +58,7 @@ export async function registerBiometric(): Promise<void> {
   if (!credential) throw new Error('Registration cancelled')
 
   localStorage.setItem(CRED_KEY, bufferToBase64(credential.rawId))
+  localStorage.setItem(ORIGIN_KEY, window.location.hostname)
 }
 
 export async function authenticateBiometric(): Promise<void> {
