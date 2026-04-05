@@ -87,6 +87,43 @@ export interface AppSettings {
   userProfile: UserProfile
 }
 
+// ── Credit Card & Expense entities ───────────────────────────────────────────
+
+export type CategoryType =
+  | 'food' | 'bills' | 'insurance' | 'transport'
+  | 'fuel' | 'haircut' | 'household'
+
+export interface CreditCard {
+  id: string
+  name: string
+  linkedBankAccountId: string
+  color: string
+  createdAt: string
+}
+
+export interface CreditCardTransaction {
+  id: string
+  creditCardId: string
+  date: string               // ISO 8601
+  businessName: string
+  amount: number             // native currency, always positive
+  currency: string
+  category: CategoryType
+  categorySource: 'keyword' | 'ai' | 'user'
+  importBatchId: string
+  createdAt: string
+}
+
+export interface ImportBatch {
+  id: string
+  creditCardId: string
+  fileName: string
+  transactionCount: number
+  totalAmount: number
+  currency: string
+  importedAt: string
+}
+
 export interface RecommendationAction {
   type: 'transfer' | 'savings_withdrawal' | 'deposit_withdrawal' | 'liquidation'
   fromId: string
@@ -282,6 +319,16 @@ interface FinanceState {
   sampleDataLoaded: boolean
   sampleDataDismissed: boolean
 
+  // Credit card & expense tracking
+  creditCards: CreditCard[]
+  transactions: CreditCardTransaction[]
+  importBatches: ImportBatch[]
+  categoryRules: Record<string, CategoryType>   // key = businessName.toLowerCase().trim()
+
+  // Sync status (ephemeral, not sent to cloud)
+  syncStatus: 'idle' | 'syncing' | 'synced' | 'offline'
+  setSyncStatus: (s: 'idle' | 'syncing' | 'synced' | 'offline') => void
+
   addAccount: (data: Omit<BankAccount, 'id' | 'createdAt'>) => void
   updateAccount: (id: string, data: Partial<BankAccount>) => void
   deleteAccount: (id: string) => void
@@ -316,6 +363,15 @@ interface FinanceState {
   applyRecommendation: (action: RecommendationAction) => void
   updateSettings: (s: Partial<AppSettings>) => void
   dismissSampleBanner: () => void
+
+  addCreditCard: (data: Omit<CreditCard, 'id' | 'createdAt'>) => void
+  updateCreditCard: (id: string, data: Partial<Omit<CreditCard, 'id' | 'createdAt'>>) => void
+  deleteCreditCard: (id: string) => void  // cascades transactions + batches
+
+  addTransactions: (txns: CreditCardTransaction[]) => void
+  addImportBatch: (batch: ImportBatch) => void
+  deleteImportBatch: (batchId: string) => void  // cascades transactions
+  updateTransactionCategory: (id: string, category: CategoryType) => void  // also saves to categoryRules
 }
 
 export const useFinanceStore = create<FinanceState>()(
@@ -330,6 +386,13 @@ export const useFinanceStore = create<FinanceState>()(
       settings: DEFAULT_SETTINGS,
       sampleDataLoaded: false,
       sampleDataDismissed: false,
+
+      creditCards: [],
+      transactions: [],
+      importBatches: [],
+      categoryRules: {},
+      syncStatus: 'idle',
+      setSyncStatus: (s) => set({ syncStatus: s }),
 
       addAccount: (data) => {
         const account: BankAccount = { ...data, id: `acc-${Date.now()}`, createdAt: new Date().toISOString() }
@@ -547,6 +610,62 @@ export const useFinanceStore = create<FinanceState>()(
       },
 
       dismissSampleBanner: () => set({ sampleDataDismissed: true }),
+
+      addCreditCard: (data) => {
+        const card: CreditCard = { ...data, id: `card-${Date.now()}`, createdAt: new Date().toISOString() }
+        set((state) => ({ creditCards: [...state.creditCards, card] }))
+      },
+
+      updateCreditCard: (id, data) => {
+        set((state) => ({
+          creditCards: state.creditCards.map((c) => (c.id === id ? { ...c, ...data } : c)),
+        }))
+      },
+
+      deleteCreditCard: (id) => {
+        set((state) => {
+          const batchIds = new Set(
+            state.importBatches.filter((b) => b.creditCardId === id).map((b) => b.id)
+          )
+          return {
+            creditCards: state.creditCards.filter((c) => c.id !== id),
+            importBatches: state.importBatches.filter((b) => b.creditCardId !== id),
+            transactions: state.transactions.filter(
+              (t) => t.creditCardId !== id && !batchIds.has(t.importBatchId)
+            ),
+          }
+        })
+      },
+
+      addTransactions: (txns) => {
+        set((state) => ({ transactions: [...state.transactions, ...txns] }))
+      },
+
+      addImportBatch: (batch) => {
+        set((state) => ({ importBatches: [...state.importBatches, batch] }))
+      },
+
+      deleteImportBatch: (batchId) => {
+        set((state) => ({
+          importBatches: state.importBatches.filter((b) => b.id !== batchId),
+          transactions: state.transactions.filter((t) => t.importBatchId !== batchId),
+        }))
+      },
+
+      updateTransactionCategory: (id, category) => {
+        set((state) => {
+          const txn = state.transactions.find((t) => t.id === id)
+          const updatedRules = txn
+            ? { ...state.categoryRules, [txn.businessName.toLowerCase().trim()]: category }
+            : state.categoryRules
+          return {
+            transactions: state.transactions.map((t) =>
+              t.id === id ? { ...t, category, categorySource: 'user' as const } : t
+            ),
+            categoryRules: updatedRules,
+          }
+        })
+      },
     }),
     {
       name: 'floww-state-v3',
@@ -578,6 +697,13 @@ export const useFinanceStore = create<FinanceState>()(
           // Migrate snapshots / trackingSettings
           if (!state.snapshots) state.snapshots = []
           if (!state.trackingSettings) state.trackingSettings = []
+          // Migrate credit card & expense tracking fields
+          if (!state.creditCards) state.creditCards = []
+          if (!state.transactions) state.transactions = []
+          if (!state.importBatches) state.importBatches = []
+          if (!state.categoryRules) state.categoryRules = {}
+          // syncStatus is ephemeral — always reset on load
+          state.syncStatus = 'idle'
           // Seed one snapshot per existing investment that has no snapshot yet
           for (const inv of state.investments) {
             const hasSnap = state.snapshots.some((s) => s.investmentId === inv.id)

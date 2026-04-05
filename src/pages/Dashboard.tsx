@@ -63,7 +63,9 @@ export function Dashboard() {
   const rates = settings.exchangeRates
   const displayCurrency = settings.displayCurrency
 
-  const snapshots = useFinanceStore((s) => s.snapshots)
+  const snapshots    = useFinanceStore((s) => s.snapshots)
+  const transactions = useFinanceStore((s) => s.transactions)
+  const creditCards  = useFinanceStore((s) => s.creditCards)
 
   const totals = useMemo(() => {
     const liquidILS = accounts.reduce((s, a) => s + computeTotalBalance(a, rates), 0)
@@ -89,6 +91,15 @@ export function Dashboard() {
       assets: toDisplay(assetsILS),
     }
   }, [accounts, investments, assets, rates, displayCurrency])
+
+  const cardSpending = useMemo(() => {
+    const now = new Date()
+    const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    const total = transactions
+      .filter((t) => t.date.startsWith(prefix))
+      .reduce((s, t) => s + convertAmount(t.amount, t.currency, 'ILS', rates), 0)
+    return convertAmount(total, 'ILS', displayCurrency, rates)
+  }, [transactions, rates, displayCurrency])
 
   const portfolioReturn = useMemo(
     () => portfolioWeightedReturn(snapshots, investments.map((i) => i.id)),
@@ -146,6 +157,9 @@ export function Dashboard() {
             )}
           </div>
           <KPICard label="Assets" value={totals.assets} currency={displayCurrency} compact />
+          {creditCards.length > 0 && (
+            <KPICard label="Card Spending" value={cardSpending} currency={displayCurrency} compact />
+          )}
         </div>
 
         {/* Suggestions — mobile only; desktop shows in right panel */}

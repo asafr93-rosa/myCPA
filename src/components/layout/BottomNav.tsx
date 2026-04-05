@@ -35,12 +35,13 @@ const NAV_ITEMS = [
     ),
   },
   {
-    path: '/assets',
-    label: 'Assets',
+    path: '/expenses',
+    label: 'Expenses',
     icon: (
       <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
-        <path d="M1.5 17V8.5L9 3l7.5 5.5V17H1.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-        <path d="M6.5 17v-5h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+        <rect x="1" y="3" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M1 7h16" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M5 11h2M9 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
       </svg>
     ),
   },

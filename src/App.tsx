@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
-import { LockScreen } from './components/auth/LockScreen'
+import { AuthGuard } from './components/auth/AuthGuard'
 import { Toaster } from 'react-hot-toast'
 import { Sidebar } from './components/layout/Sidebar'
 import { BottomNav } from './components/layout/BottomNav'
@@ -12,6 +12,8 @@ import { Investments } from './pages/Investments'
 import { Assets } from './pages/Assets'
 import { AIAdvisor } from './pages/AIAdvisor'
 import { PrioritySettings } from './pages/PrioritySettings'
+import { Expenses } from './pages/Expenses'
+import { ImportPage } from './pages/ImportPage'
 import { useFinanceStore } from './store/useFinanceStore'
 
 function ThemeApplier() {
@@ -23,7 +25,7 @@ function ThemeApplier() {
 }
 
 function SampleDataBanner() {
-  const sampleDataLoaded = useFinanceStore((s) => s.sampleDataLoaded)
+  const sampleDataLoaded    = useFinanceStore((s) => s.sampleDataLoaded)
   const sampleDataDismissed = useFinanceStore((s) => s.sampleDataDismissed)
   const dismissSampleBanner = useFinanceStore((s) => s.dismissSampleBanner)
 
@@ -71,80 +73,37 @@ function Layout() {
 }
 
 export default function App() {
-  const [unlocked, setUnlocked] = useState(false)
-
-  useEffect(() => {
-    const wasUnlocked = sessionStorage.getItem('floww-unlocked') === '1'
-    const hiddenAt = sessionStorage.getItem('floww-hidden-at')
-    if (wasUnlocked && !hiddenAt) {
-      setUnlocked(true)
-    }
-
-    function onVisibilityChange() {
-      if (document.visibilityState === 'hidden') {
-        sessionStorage.setItem('floww-hidden-at', String(Date.now()))
-      } else if (document.visibilityState === 'visible') {
-        const ts = sessionStorage.getItem('floww-hidden-at')
-        if (ts && Date.now() - Number(ts) > 15_000) {
-          sessionStorage.removeItem('floww-unlocked')
-          sessionStorage.removeItem('floww-hidden-at')
-          setUnlocked(false)
-        } else {
-          sessionStorage.removeItem('floww-hidden-at')
-        }
-      }
-    }
-
-    document.addEventListener('visibilitychange', onVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
-  }, [])
-
-  function handleUnlock() {
-    sessionStorage.setItem('floww-unlocked', '1')
-    sessionStorage.removeItem('floww-hidden-at')
-    setUnlocked(true)
-  }
-
-  if (!unlocked) {
-    return (
-      <>
-        <ThemeApplier />
-        <LockScreen onUnlock={handleUnlock} />
-      </>
-    )
-  }
-
   return (
-    <BrowserRouter>
-      <ThemeApplier />
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          style: {
-            background: '#161B22',
-            color: '#E6EDF3',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '10px',
-            fontSize: '13px',
-          },
-          success: {
-            iconTheme: { primary: '#00D4AA', secondary: '#0D1117' },
-          },
-          error: {
-            iconTheme: { primary: '#F87171', secondary: '#0D1117' },
-          },
-        }}
-      />
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="accounts" element={<BankAccounts />} />
-          <Route path="investments" element={<Investments />} />
-          <Route path="assets" element={<Assets />} />
-          <Route path="advisor" element={<AIAdvisor />} />
-          <Route path="settings" element={<PrioritySettings />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <AuthGuard>
+      <BrowserRouter>
+        <ThemeApplier />
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: '#161B22',
+              color: '#E6EDF3',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '10px',
+              fontSize: '13px',
+            },
+            success: { iconTheme: { primary: '#00D4AA', secondary: '#0D1117' } },
+            error:   { iconTheme: { primary: '#F87171', secondary: '#0D1117' } },
+          }}
+        />
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index                  element={<Dashboard />} />
+            <Route path="accounts"        element={<BankAccounts />} />
+            <Route path="investments"     element={<Investments />} />
+            <Route path="assets"          element={<Assets />} />
+            <Route path="advisor"         element={<AIAdvisor />} />
+            <Route path="settings"        element={<PrioritySettings />} />
+            <Route path="expenses"        element={<Expenses />} />
+            <Route path="import"          element={<ImportPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthGuard>
   )
 }
