@@ -6,11 +6,61 @@ import { LoginPage } from './LoginPage'
 import { LockScreen } from './LockScreen'
 import { MigrationDialog } from './MigrationDialog'
 
+const SUPABASE_CONFIGURED =
+  !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY
+
 interface Props {
   children: React.ReactNode
 }
 
 export function AuthGuard({ children }: Props) {
+  // ── Supabase not configured — behave exactly like the original app ─────────
+  if (!SUPABASE_CONFIGURED) {
+    return <LocalOnlyGuard>{children}</LocalOnlyGuard>
+  }
+
+  return <CloudGuard>{children}</CloudGuard>
+}
+
+// Original lock-screen-only guard (no cloud auth)
+function LocalOnlyGuard({ children }: Props) {
+  const [unlocked, setUnlocked] = useState(false)
+
+  useEffect(() => {
+    const wasUnlocked = sessionStorage.getItem('floww-unlocked') === '1'
+    const hiddenAt    = sessionStorage.getItem('floww-hidden-at')
+    if (wasUnlocked && !hiddenAt) setUnlocked(true)
+
+    function onVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        sessionStorage.setItem('floww-hidden-at', String(Date.now()))
+      } else if (document.visibilityState === 'visible') {
+        const ts = sessionStorage.getItem('floww-hidden-at')
+        if (ts && Date.now() - Number(ts) > 15_000) {
+          sessionStorage.removeItem('floww-unlocked')
+          sessionStorage.removeItem('floww-hidden-at')
+          setUnlocked(false)
+        } else {
+          sessionStorage.removeItem('floww-hidden-at')
+        }
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [])
+
+  function handleUnlock() {
+    sessionStorage.setItem('floww-unlocked', '1')
+    sessionStorage.removeItem('floww-hidden-at')
+    setUnlocked(true)
+  }
+
+  if (!unlocked) return <LockScreen onUnlock={handleUnlock} />
+  return <>{children}</>
+}
+
+// Full cloud-auth guard (used once Supabase is configured)
+function CloudGuard({ children }: Props) {
   const { session, authLoading, signIn, signOut } = useAuth()
   const [unlocked, setUnlocked]       = useState(false)
   const [dataReady, setDataReady]     = useState(false)
