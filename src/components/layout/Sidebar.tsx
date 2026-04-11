@@ -88,6 +88,7 @@ export function Sidebar() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!supabase) return
     supabase.auth.getSession().then(({ data }) => {
       setUserEmail(data.session?.user.email ?? null)
     })
